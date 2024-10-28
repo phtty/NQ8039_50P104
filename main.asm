@@ -19,7 +19,7 @@ PROG	SECTION	OFFSET	CODE_BEG				;定义代码段的偏移量从CODE_BEG开始，
 ;***************************************
 	.include	50Px1x.h
 	.include	RAM.INC	
-	.include	50P116.mac
+	.include	50Px1x.mac
 	.include	MACRO.mac
 ;***************************************
 STACK_BOT		EQU		FFH						;堆栈底部
@@ -52,40 +52,11 @@ V_RESET:
 
 	jsr		F_Timer_Init
 
-	lda		PC
-	and		#11B
-	beq		L_MODE0
-	cmp		#01B
-	beq		L_MODE1
-	cmp		#10B
-	beq		L_MODE2
-	bra		V_RESET
-
-L_MODE0:										; MODE0代表椭圆时钟
-	jsr		F_Port_Init2						; Mode0初始化
-	jsr		F_LCD_Init2
-	jsr		F_MODE0_Init
 	cli											; 开总中断
 
-	jsr		F_Test_Mode2
-	jsr		F_Display_Symbol2
-	jsr		F_Display_Time2
-	jmp		MainLoop2
-
-L_MODE1:										; MODE1代表旧方块时钟
-	cli											; 开总中断
 	rmb0	Key_Flag
 	jsr		F_Test_Mode
 	jsr		F_Display_Symbol
-	jmp		MainLoop
-
-L_MODE2:										; MODE2代表星期方块时钟
-	cli
-	smb0	Clock_Flag
-	jsr		F_Test_Mode
-	jsr		F_Display_Symbol3
-	jsr		F_Display_Date3
-	jmp		MainLoop3
 
 ;***********************************************************************
 ;***********************************************************************
@@ -203,30 +174,15 @@ L_EndIrq:
 
 
 ;***********************************************************************
-.include	main2.asm
-.include	main3.asm
 .include	ScanKey.asm
-.include	ScanKey2.asm
-.include	ScanKey3.asm
 .include	Time.asm
-.include	Time2.asm
-.include	Time3.asm
 .include	Calendar.asm
-.include	Calendar3.asm
 .include	Alarm.asm
-.include	Alarm2.asm
-.include	Alarm3.asm
 .include	Backlight.asm
 .include	Init.asm
 .include	Disp.asm
-.include	Disp2.asm
-.include	Disp3.asm
 .include	Display.asm
-.include	Display2.asm
-.include	Display3.asm
 .include	Lcdtab.asm
-.include	Lcdtab2.asm
-.include	Lcdtab3.asm
 .include	TestMode.asm
 
 ;--------------------------------------------------------	
