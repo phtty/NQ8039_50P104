@@ -1,4 +1,4 @@
-F_Init_SystemRam_Prog:							; 系统初始化
+F_Init_SystemRam:							; 系统初始化
 	lda		#0
 	sta		Counter_1Hz
 	sta		Counter_16Hz
@@ -38,48 +38,49 @@ F_Init_SystemRam_Prog:							; 系统初始化
 
 
 F_LCD_Init:
-	LCD_C_TYPE
-	LCD_ENCH_EN
-	LCD_4COM
-	LCD_DRIVE_8
-	LCD_C_1_3_BAIS_3V
+	; 设置为强模式，1/3Bias 3.0V
+	lda		#C_BIS_C_1_3_V45+C_HIS_Strong
+	sta		LCD_CTRL
 
-	PC67_SEG									; 配置IO口为SEG线模式
-	PD03_SEG
-	PD47_SEG
+	; 设置为4COM 28SEG模式，打开Charge Pump， LCD中断频率为1/2FrameRate
+	lda		#C_COM_4_28+C_ENCH_Enable+C_LCDIS_Rate_2
+	sta		LCD_COM
 
-	LCD_ON
+	; 设置Seg线 除了S0、S1做IO口，其他全作Seg线
+	lda		#C_PC2S+C_PC3S+C_PC54S+C_PC76S+C_PD30S+C_PD74S
+	sta		PC_SEG
+	lda		#$ff
+	sta		PD_SEG
+
+	lda		TMRC
+	ora		#C_LCDON
+	sta		TMRC
+
 	jsr		F_ClearScreen						; 清屏
 
 	rts
 
 
 F_Port_Init:
-	lda		#$f0
+	lda		#$ac
 	sta		PA_WAKE
-	lda		#$f0
+	lda		#$8c
 	sta		PA_DIR
-	lda		#$f0
+	lda		#$ac
 	sta		PA
-	EN_PA_IRQ									; 打开PA口外部中断
+	
+	smb4	IER									; 打开PA口外部中断
 
 	lda		PB
-	and		#$f7
+	and		#$fb
 	sta		PB
-	PB3_PB3_COMS								; PB3口作背光输出
-	
-	lda		PC_SEG								; 配置PC0~5为普通IO口
-	and		#$e0
-	sta		PC_SEG
-	lda		PC_DIR								; PC2~5作拨键输入，PC0、1做邦选
-	ora		#$3f
-	sta		PC_DIR
-	lda		PC									; PC0~5配置为下拉
-	ora		#$3f
-	sta		PC
 
-	lda		#$00
-	sta		PC_IO_Backup
+	lda		#04
+	sta		PB_TYPE
+
+	; PB2口作背光输出,PB3作PN声音输出
+	lda		#C_PB3S
+	sta		PADF0
 
 	rts
 
@@ -87,7 +88,10 @@ F_Port_Init:
 F_Timer_Init:
 	TMR0_CLK_FSUB								; TIM0时钟源Fsub(32768Hz)
 	TMR1_CLK_512Hz								; TIM1时钟源Fsub/64(512Hz)
-	DIV_512HZ									; TIM2时钟源DIV分频
+	; TIM2时钟源DIV,Fsub 64分频512Hz，关闭定时器同步
+	lda		DIVC
+	ora		#C_DIVC_Fsub_64+C_Asynchronous
+	sta		DIVC
 
 	lda		#$0									; 重装载计数设置为0
 	sta		TMR0
@@ -96,61 +100,27 @@ F_Timer_Init:
 	lda		#$bf								; 8Hz一次中断
 	sta		TMR1
 
-	rmb6	DIVC								; 关闭定时器同步
+	lda		IER									; 开定时器中断
+	ora		#C_TMR0I+C_TMR1I+C_TMR2I
+	sta		IER
 
-	EN_TMR1_IRQ									; 开定时器终端
-	EN_TMR2_IRQ
-	EN_TMR0_IRQ
-	TMR0_OFF
-	TMR1_OFF
-	TMR2_ON
-
-	DIS_LCD_IRQ
+	rmb0	TMRC								; 初始化只开TIM2走时
+	rmb1	TMRC
+	smb2	TMRC
 
 	rts
 
 
 F_Beep_Init:
-	PB2_PWM										; PP(PB2)不作IO用，配置成PWM输出模式
-	rmb2    DIVC								; 配置蜂鸣音调频率(占空比3/4)
-    rmb3    DIVC
-	rmb7	DIVC
+	; 配置蜂鸣器的PWM输出口为PB3 PN输出
+	lda		#C_PB3S
+	sta		PADF0
+
+	; 配置PWM频率为Fsub的16分频 1/2占空比
+	lda		DIVC
+	ora		#C_TONE_Fsub_16_1_2
+	sta		DIVC
+
 	rmb1	AUDCR								; 配置BP位，选择AUD开启时的模式，这里选择TONE模式				
 	lda		#$ff
 	sta		AUD0								; TONE模式下其实AUD0没用
-
-
-F_Port_Init2:
-	lda		#$fc
-	sta		PA_WAKE
-	lda		#$fc
-	sta		PA_DIR
-	lda		#$fc
-	sta		PA
-	EN_PA_IRQ									; 打开PA口外部中断
-
-	PB3_PB3_COMS								; PB口作背光输出
-	
-	lda		PC_SEG								; 配置PC0~5为普通IO口
-	and		#$e0
-	sta		PC_SEG
-	lda		PC_DIR								; PC0/2~5作拨键输入
-	ora		#$3d
-	sta		PC_DIR
-	lda		PC									; PC0/2~5配置为下拉
-	ora		#$3d
-	sta		PC
-
-	lda		#$00
-	sta		PC_IO_Backup
-
-	rts
-
-F_LCD_Init2:
-	LCD_OFF
-	LCD_3COM
-	LCD_ON
-
-	jsr		F_ClearScreen						; 清屏
-
-	rts

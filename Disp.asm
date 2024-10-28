@@ -41,113 +41,44 @@ L_FillLcd:
 ;			X = offset	
 ;@impact:	P_Temp，P_Temp+1，P_Temp+2，P_Temp+3, X，A
 ;===========================================================
-L_Dis_7Bit_DigitDot_Prog:
-	stx		P_Temp+1					; 偏移量暂存进P_Temp+3, 腾出X来做变址寻址
-	sta		P_Temp						; 将显示的数字转换为内存偏移量
+L_Dis_15Bit_DigitDot_Prog:
+	stx		P_Temp+2					; 偏移量暂存进P_Temp+2, 腾出X来做变址寻址
 
+	clc
+	rol									; 乘以2得到正确的偏移量
 	tax
-	lda		Table_Digit_7bit,x			; 将显示的数字通过查表找到对应的段码存进A
-	sta		P_Temp						; 暂存段码值到P_Temp
+	lda		Table_Digit_15bit,x			; 将显示的数字通过查表找到对应的段码存进A
+	sta		P_Temp+1					; 暂存段码值到P_Temp+1、P_Temp
+	inx
+	lda		Table_Digit_15bit,x
+	sta		P_Temp
 
-	ldx		P_Temp+1					; 将偏移量取回
-	stx		P_Temp+1					; 暂存偏移量到P_Temp+3
-	lda		#7
-	sta		P_Temp+2					; 设置显示段数为7
-L_Judge_Dis_7Bit_DigitDot:				; 显示循环的开始
-	ldx		P_Temp+1					; 取回偏移量作为索引
+	lda		#15
+	sta		P_Temp+3					; 设置显示段数为15
+L_Judge_Dis_15Bit_DigitDot:				; 显示循环的开始
+	ldx		P_Temp+2					; 表头偏移量->X
 	lda		Lcd_bit,x					; 查表定位目标段的bit位
-	sta		P_Temp+3	
+	sta		P_Temp+4					; bit位->P_Temp+4
 	lda		Lcd_byte,x					; 查表定位目标段的显存地址
-	tax
+	tax									; 显存地址偏移->X
 	ror		P_Temp						; 循环右移取得目标段是亮或者灭
-	bcc		L_CLR_7bit					; 当前段的值若是0则进清点子程序
+	ror		P_Temp+1
+	bcc		L_CLR_15bit					; 当前段的值若是0则进清点子程序
 	lda		LCD_RamAddr,x				; 将目标段的显存的特定bit位置1来打亮
-	ora		P_Temp+3
+	ora		P_Temp+4
 	sta		LCD_RamAddr,x
-	bra		L_Inc_Dis_Index_Prog_7bit	; 跳转到显示索引增加的子程序。
-L_CLR_7bit:	
+	bra		L_Inc_Dis_Index_Prog_15bit	; 跳转到显示索引增加的子程序。
+L_CLR_15bit:	
 	lda		LCD_RamAddr,x				; 加载LCD RAM的地址
-	ora		P_Temp+3					; 将COM和SEG信息与LCD RAM地址进行逻辑或操作
-	eor		P_Temp+3					; 进行异或操作，用于清除对应的段。
+	ora		P_Temp+4					; 将COM和SEG信息与LCD RAM地址进行逻辑或操作
+	eor		P_Temp+4					; 进行异或操作，用于清除对应的段。
 	sta		LCD_RamAddr,x				; 将结果写回LCD RAM，清除对应位置。
-L_Inc_Dis_Index_Prog_7bit:
-	inc		P_Temp+1					; 递增偏移量，处理下一个段
-	dec		P_Temp+2					; 递减剩余要显示的段数
-	bne		L_Judge_Dis_7Bit_DigitDot	; 剩余段数为0则返回
+L_Inc_Dis_Index_Prog_15bit:
+	inc		P_Temp+2					; 递增偏移量，处理下一个段
+	dec		P_Temp+3					; 递减剩余要显示的段数
+	bne		L_Judge_Dis_15Bit_DigitDot	; 剩余段数为0则返回
 	rts
 
-
-; 6bit数显	lcd_d9
-L_Dis_6Bit_DigitDot_Prog:
-	stx		P_Temp+1					; 偏移量暂存进P_Temp+3, 腾出X来做变址寻址
-	sta		P_Temp						; 将显示的数字转换为内存偏移量
-
-	tax
-	lda		Table_Digit_6bit,x			; 将显示的数字通过查表找到对应的段码存进A
-	sta		P_Temp						; 暂存段码值到P_Temp
-
-	ldx		P_Temp+1					; 将偏移量取回
-	stx		P_Temp+1					; 暂存偏移量到P_Temp+3
-	lda		#6
-	sta		P_Temp+2					; 设置显示段数为6
-L_Judge_Dis_6Bit_DigitDot				; 显示循环的开始
-	ldx		P_Temp+1					; 取回偏移量作为索引
-	lda		Lcd_bit,x					; 查表定位目标段的bit位
-	sta		P_Temp+3	
-	lda		Lcd_byte,x					; 查表定位目标段的显存地址
-	tax
-	ror		P_Temp						; 循环右移取得目标段是亮或者灭
-	bcc		L_CLR_6bit					; 当前段的值若是0则进清点子程序
-	lda		LCD_RamAddr,x				; 将目标段的显存的特定bit位置1来打亮
-	ora		P_Temp+3
-	sta		LCD_RamAddr,x
-	bra		L_Inc_Dis_Index_Prog_6bit	; 跳转到显示索引增加的子程序。
-L_CLR_6bit:	
-	lda		LCD_RamAddr,x				; 加载LCD RAM的地址
-	ora		P_Temp+3					; 将COM和SEG信息与LCD RAM地址进行逻辑或操作
-	eor		P_Temp+3					; 进行异或操作，用于清除对应的段。
-	sta		LCD_RamAddr,x				; 将结果写回LCD RAM，清除对应位置。
-L_Inc_Dis_Index_Prog_6bit:
-	inc		P_Temp+1					; 递增偏移量，处理下一个段
-	dec		P_Temp+2					; 递减剩余要显示的段数
-	bne		L_Judge_Dis_6Bit_DigitDot	; 剩余段数为0则返回
-	rts
-
-; 3bit数显 lcd_d0&lcd_d7
-L_Dis_3Bit_DigitDot_Prog:
-	stx		P_Temp+1					; 偏移量暂存进P_Temp+3, 腾出X来做变址寻址
-	sta		P_Temp						; 将显示的数字转换为内存偏移量
-
-	tax
-	lda		Table_Digit_3bit,x			; 将显示的数字通过查表找到对应的段码存进A
-	sta		P_Temp						; 暂存段码值到P_Temp
-
-	ldx		P_Temp+1					; 将偏移量取回
-	stx		P_Temp+1					; 暂存偏移量到P_Temp+3
-	lda		#3
-	sta		P_Temp+2					; 设置显示段数为3
-L_Judge_Dis_3Bit_DigitDot				; 显示循环的开始
-	ldx		P_Temp+1					; 取回偏移量作为索引
-	lda		Lcd_bit,x					; 查表定位目标段的bit位
-	sta		P_Temp+3	
-	lda		Lcd_byte,x					; 查表定位目标段的显存地址
-	tax
-	ror		P_Temp						; 循环右移取得目标段是亮或者灭
-	bcc		L_CLR_3bit					; 当前段的值若是0则进清点子程序
-	lda		LCD_RamAddr,x				; 将目标段的显存的特定bit位置1来打亮
-	ora		P_Temp+3
-	sta		LCD_RamAddr,x
-	bra		L_Inc_Dis_Index_Prog_3bit	; 跳转到显示索引增加的子程序
-L_CLR_3bit:
-	lda		LCD_RamAddr,x				; 加载LCD RAM的地址
-	ora		P_Temp+3					; 将COM和SEG信息与LCD RAM地址进行逻辑或操作
-	eor		P_Temp+3					; 进行异或操作，用于清除对应的段
-	sta		LCD_RamAddr,x				; 将结果写回LCD RAM，清除对应位置
-L_Inc_Dis_Index_Prog_3bit:
-	inc		P_Temp+1					; 递增偏移量，处理下一个段
-	dec		P_Temp+2					; 递减剩余要显示的段数
-	bne		L_Judge_Dis_3Bit_DigitDot	; 剩余段数为0则返回
-	rts
 
 ;-----------------------------------------
 ;@brief:	单独的画点、清点函数,一般用于MS显示
@@ -177,62 +108,15 @@ F_DispSymbol_Com:
 
 ;============================================================
 
-Table_Digit_14bit:
-	.word	$00ed	; SUN
-	.word	$0536	; MON
-	.word	$1201	; TUE
-	.word	$2836	; WED
-	.word	$1201	; THU
-	.word	$00f1	; FRI
-	.word	$00ed	; SAT
+Table_Digit_15bit:
+	.word	$7b6f	; 0
+	.word	$4924	; 1
+	.word	$73e7	; 2
+	.word	$79e7	; 3
+	.word	$49ed	; 4
+	.word	$79cf	; 5
+	.word	$7bcf	; 6
+	.word	$4927	; 7
+	.word	$7bef	; 8
+	.word	$79ef	; 9
 	.word	$0000	; undisplay
-
-Table_Digit_12bit:
-	.word	$0536	; SUN
-	.word	$0536	; MON
-	.word	$00f9	; TUE
-	.word	$0a0f	; WED
-	.word	$003e	; THU
-	.word	$0a09	; FRI
-	.word	$0a01	; SAT
-	.word	$0000	; undisplay
-
-Table_Digit_9bit:
-	.word	$003e	; SUN
-	.word	$003f	; MON
-	.word	$003e	; TUE
-	.word	$00f9	; WED
-	.word	$00f6	; THU
-	.word	$01f3	; FRI
-	.word	$00f7	; SAT
-	.word	$0000	; undisplay
-
-Table_Digit_7bit:
-	.byte	$3f	; 0
-	.byte	$06	; 1
-	.byte	$5b	; 2
-	.byte	$4f	; 3
-	.byte	$66	; 4
-	.byte	$6d	; 5
-	.byte	$7d	; 6
-	.byte	$07	; 7
-	.byte	$7f	; 8
-	.byte	$6f	; 9
-	.byte	$00	; undisplay
-
-Table_Digit_4bit:
-	.byte	$00	; undisplay
-	.byte	$06	; 1
-	.byte	$3b	; 2
-	.byte	$07	; 3
-
-Table_Digit_6bit:
-	.byte	$00	; undisplay
-	.byte	$06	; 1
-	.byte	$3b	; 2
-	.byte	$2f	; 3
-
-Table_Digit_3bit:
-	.byte	$00	; undisplay
-	.byte	$06	; 1
-	.byte	$03	; 2

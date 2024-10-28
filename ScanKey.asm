@@ -110,7 +110,7 @@ F_KeyTrigger_RunTimeMode:
 	rts
 L_KeyTrigger_RunTimeMode:
 	rmb0	Key_Flag
-	TMR1_OFF									; 没有快加功能不需要开Timer1的8Hz计时
+	rmb1	TMRC								; 没有快加功能不需要开Timer1的8Hz计时
 	lda		#$00
 	sta		P_Temp
 L_DelayTrigger_RunTimeMode:						; 消抖延时循环用标签
@@ -250,7 +250,7 @@ No_KeyBTrigger_DateSetMode:
 	jmp		L_KeySTrigger_DateSetMode			; year触发
 
 L_KeyExit_DateSetMode:
-	TMR1_OFF									; 关闭快加8Hz计时的定时器
+	rmb1	TMRC								; 关闭快加8Hz计时的定时器
 	rmb0	Key_Flag							; 清相关标志位
 	rmb3	Timer_Flag
 	lda		#0									; 清理相关变量
@@ -404,7 +404,7 @@ No_KeyBTrigger_TimeSetMode:
 	jmp		L_KeySTrigger_TimeSetMode			; 12/24h触发
 
 L_KeyExit_TimeSetMode:
-	TMR1_OFF									; 关闭快加8Hz计时的定时器
+	rmb1	TMRC								; 关闭快加8Hz计时的定时器
 	rmb0	Key_Flag							; 清相关标志位
 	rmb3	Timer_Flag
 	lda		#0									; 清理相关变量
@@ -514,7 +514,7 @@ No_KeyBTrigger_AlarmSetMode:
 	jmp		L_KeySTrigger_AlarmSetMode			; 12/24h触发
 
 L_KeyExit_AlarmSetMode:
-	TMR1_OFF									; 关闭快加8Hz计时的定时器
+	rmb1	TMRC								; 关闭快加8Hz计时的定时器
 	rmb0	Key_Flag							; 清相关标志位
 	rmb3	Timer_Flag
 	lda		#0									; 清理相关变量

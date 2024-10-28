@@ -1,7 +1,3 @@
 .vscode/settings.*
 build/
-*.bin
-*.dbg
 *.lst
-*.map
-*.o

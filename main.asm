@@ -1,72 +1,71 @@
-;********************************************************************************
-; PROJECT	: Time Counter(ET50P104)					*
-; AUTHOR	: WYH										*
-; REVISION	: 09/23/2024  V1.0							*
-; High OSC CLK  : Internal RC 4.4MHz	Fcpu = Fosc/2	*
-; Function	: 											*
-;********************************************************************************
-	.CHIP	W65C02S		;cpu的选型
-	;.INCLIST	ON		;宏定义和文件
+	.CHIP	W65C02S									; cpu的选型
 	.MACLIST	ON
-;***************************************
-CODE_BEG	EQU		C000H						;起始地址
-;***************************************
 
-PROG	SECTION	OFFSET	CODE_BEG				;定义代码段的偏移量从CODE_BEG开始，用于组织程序代码。
+CODE_BEG	EQU		F000H							; 起始地址
 
-;***************************************
-;*	header include								;头文件
-;***************************************
-	.include	50Px1x.h
-	.include	RAM.INC	
-	.include	50Px1x.mac
-	.include	MACRO.mac
-;***************************************
-STACK_BOT		EQU		FFH						;堆栈底部
-;***************************************
-	.PROG										;程序开始
+PROG	SECTION	OFFSET	CODE_BEG					; 定义代码段的偏移量从CODE_BEG开始，用于组织程序代码。
+
+.include	50Px1x.h								; 头文件
+.include	RAM.INC	
+.include	50P104.mac
+.include	MACRO.mac
+
+STACK_BOT		EQU		FFH							; 堆栈底部
+
+	.PROG											; 程序开始
 V_RESET:
 	nop
 	nop
 	nop
 	ldx		#STACK_BOT
-	txs											; 使用这个值初始化堆栈指针，这通常是为了设置堆栈的底部地址，确保程序运行中堆栈的正确使用。
-	lda		#$17								; #$97
-	sta		SYSCLK								; 设置系统时钟
-	ClrAllRam									; 清RAM
+	txs												; 使用这个值初始化堆栈指针，这通常是为了设置堆栈的底部地址，确保程序运行中堆栈的正确使用。
+	lda		#$17									; #$97
+	sta		SYSCLK									; 设置系统时钟
+	
+	lda		#00										; 清整个RAM
+	ldx		#$ff
+	sta		$1800
+L_Clear_Ram_Loop:
+	sta		$1800,x
+	dex
+	bne		L_Clear_Ram_Loop
+
 	lda		#$0
-	sta		DIVC								; 分频控制器，定时器与DIV异步
-	sta		IER									; 除能中断
-	sta		IFR									; 初始化中断标志位
+	sta		DIVC									; 分频控制器，定时器与DIV异步
+	sta		IER										; 除能中断
+	sta		IFR										; 初始化中断标志位
 	lda		FUSE
-	sta		MF0									;为内部RC振荡器提供校准数据	
+	sta		MF0										; 为内部RC振荡器提供校准数据	
 
 	jsr		F_Beep_Init
-	jsr		F_Init_SystemRam_Prog				;初始化系统RAM并禁用所有断电保留的RAM
+	jsr		F_Init_SystemRam						; 初始化系统RAM并禁用所有断电保留的RAM
 
 	jsr		F_LCD_Init
 	jsr		F_Port_Init
 
-	lda		#$07								;系统时钟和中断使能
+	lda		#$07									; 系统时钟和中断使能
 	sta		SYSCLK
 
 	jsr		F_Timer_Init
 
-	cli											; 开总中断
+	cli												; 开总中断
+
+	lda		#8
+	ldx		#lcd_d3
+	jsr		L_Dis_15Bit_DigitDot_Prog
 
 	rmb0	Key_Flag
-	jsr		F_Test_Mode
-	jsr		F_Display_Symbol
+	;jsr		F_Test_Mode
+	;jsr		F_Display_Symbol
 
-;***********************************************************************
-;***********************************************************************
+
 ; 方块时钟（旧）状态机
 MainLoop:
-	jsr		F_Time_Run							; 走时全局生效
-	jsr		F_Switch_Scan						; 拨键扫描全局生效
-	jsr		F_Backlight							; 背光全局生效
-	jsr		F_Louding							; 响铃处理全局生效
-	jsr		F_SymbolRegulate
+	;jsr		F_Time_Run							; 走时全局生效
+	;jsr		F_Switch_Scan						; 拨键扫描全局生效
+	;jsr		F_Backlight							; 背光全局生效
+	;jsr		F_Louding							; 响铃处理全局生效
+	;jsr		F_SymbolRegulate
 
 Status_Juge:
 	bbs0	Sys_Status_Flag,Status_Runtime
@@ -75,30 +74,29 @@ Status_Juge:
 	bbs3	Sys_Status_Flag,Status_Alarm_Set
 	bra		MainLoop
 Status_Runtime:
-	jsr		F_KeyTrigger_RunTimeMode			; RunTime模式下按键逻辑
-	jsr		F_DisTime_Run
-	jsr		F_Alarm_Handler						; 只在RunTime模式下才会响闹
+	;jsr		F_KeyTrigger_RunTimeMode			; RunTime模式下按键逻辑
+	;jsr		F_DisTime_Run
+	;jsr		F_Alarm_Handler						; 只在RunTime模式下才会响闹
 	sta		HALT
 	bra		MainLoop
 Status_Calendar_Set:
-	jsr		F_KeyTrigger_DateSetMode			; DateSet模式下按键逻辑
-	jsr		F_DisCalendar_Set
+	;jsr		F_KeyTrigger_DateSetMode			; DateSet模式下按键逻辑
+	;jsr		F_DisCalendar_Set
 	sta		HALT
 	bra		MainLoop
 Status_Time_Set:
-	jsr		F_KeyTrigger_TimeSetMode			; TimeSet模式下按键逻辑
-	jsr		F_DisTime_Set
+	;jsr		F_KeyTrigger_TimeSetMode			; TimeSet模式下按键逻辑
+	;jsr		F_DisTime_Set
 	sta		HALT
 	bra		MainLoop
 Status_Alarm_Set:
-	jsr		F_KeyTrigger_AlarmSetMode			; AlarmSet模式下按键逻辑
-	jsr		F_DisAlarm_Set
+	;jsr		F_KeyTrigger_AlarmSetMode			; AlarmSet模式下按键逻辑
+	;jsr		F_DisAlarm_Set
 	sta		HALT
 	bra		MainLoop
 
 
-;***********************************************************************
-;***********************************************************************
+
 ; 中断服务函数
 V_IRQ:
 	pha
@@ -161,7 +159,7 @@ L_PaIrq:
 	rmb3	Timer_Flag							; 如果有新的下降沿到来，清快加标志位
 	rmb4	Timer_Flag							; 8Hz计时
 
-	TMR1_ON										; 快加定时
+	smb1	TMRC								; 打开快加定时
 
 	bra		L_EndIrq
 
@@ -173,27 +171,25 @@ L_EndIrq:
 	rti
 
 
-;***********************************************************************
-.include	ScanKey.asm
-.include	Time.asm
-.include	Calendar.asm
-.include	Alarm.asm
-.include	Backlight.asm
+;.include	ScanKey.asm
+;.include	Time.asm
+;.include	Calendar.asm
+;.include	Alarm.asm
+;.include	Backlight.asm
 .include	Init.asm
 .include	Disp.asm
-.include	Display.asm
+;.include	Display.asm
 .include	Lcdtab.asm
-.include	TestMode.asm
+;.include	TestMode.asm
 
-;--------------------------------------------------------	
-;***********************************************************************
+
 .BLKB	0FFFFH-$,0FFH							; 从当前地址到FFFF全部填充0xFF
 	
 .ORG	0FFF8H
 	DB		C_RST_SEL + C_OMS0 + C_PAIM
 	DB		C_PB32IS + C_PROTB
 	DW		0FFFFH
-;***********************************************************************
+
 .ORG	0FFFCH
 	DW		V_RESET
 	DW		V_IRQ
