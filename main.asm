@@ -12,6 +12,8 @@ PROG	SECTION	OFFSET	CODE_BEG					; 定义代码段的偏移量从CODE_BEG开始�
 
 STACK_BOT		EQU		FFH							; 堆栈底部
 
+
+
 	.PROG											; 程序开始
 V_RESET:
 	nop
@@ -50,19 +52,21 @@ L_Clear_Ram_Loop:
 
 	cli												; 开总中断
 
-	lda		#8
-	ldx		#lcd_d3
-	jsr		L_Dis_15Bit_DigitDot_Prog
+	lda		#5
+	sta		Frame_Counter							; 设置帧计数
+	lda		#9
+	jsr		L_Frame_TableTrans_Up					; 选择起始数字
+	ldx		#lcd_d1
+	jsr		L_Dis_15Bit_Frame
 
 	rmb0	Key_Flag
 	;jsr		F_Test_Mode
 	;jsr		F_Display_Symbol
 
 
-; 方块时钟（旧）状态机
+; 状态机
 MainLoop:
 	;jsr		F_Time_Run							; 走时全局生效
-	;jsr		F_Switch_Scan						; 拨键扫描全局生效
 	;jsr		F_Backlight							; 背光全局生效
 	;jsr		F_Louding							; 响铃处理全局生效
 	;jsr		F_SymbolRegulate
@@ -178,13 +182,14 @@ L_EndIrq:
 ;.include	Backlight.asm
 .include	Init.asm
 .include	Disp.asm
-;.include	Display.asm
+.include	Display.asm
 .include	Lcdtab.asm
 ;.include	TestMode.asm
+.include	Random.asm
 
 
 .BLKB	0FFFFH-$,0FFH							; 从当前地址到FFFF全部填充0xFF
-	
+
 .ORG	0FFF8H
 	DB		C_RST_SEL + C_OMS0 + C_PAIM
 	DB		C_PB32IS + C_PROTB

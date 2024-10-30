@@ -10,11 +10,11 @@ L_DisTime_Min:
 	pha
 	and		#$0f
 	ldx		#lcd_d3
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	pla
 	jsr		L_LSR_4Bit_Prog
 	ldx		#lcd_d2
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts	
 
 L_DisTime_Hour:									; 显示小时
@@ -22,18 +22,14 @@ L_DisTime_Hour:									; 显示小时
 	lda		R_Time_Hour
 	cmp		#12
 	bcs		L_Time12h_PM
-	ldx		#lcd_AM								; 12h模式AM需要灭PM、亮AM点
-	jsr		F_DispSymbol
-	ldx		#lcd_PM
+	ldx		#lcd_PM								; 12h模式AM需要灭PM、亮AM点
 	jsr		F_ClrpSymbol
 	lda		R_Time_Hour							; 显示函数会改A值，重新取变量
 	cmp		#0
 	beq		L_Time_0Hour
 	bra		L_Start_DisTime_Hour
 L_Time12h_PM:
-	ldx		#lcd_AM								; 12h模式PM需要灭AM、亮PM点
-	jsr		F_ClrpSymbol
-	ldx		#lcd_PM
+	ldx		#lcd_PM								; 12h模式PM需要灭AM、亮PM点
 	jsr		F_DispSymbol
 	lda		R_Time_Hour							; 显示函数会改A值，重新取变量
 	sec
@@ -45,9 +41,7 @@ L_Time_0Hour:									; 12h模式0点需要变成12点
 	bra		L_Start_DisTime_Hour
 
 L_24hMode_Time:
-	ldx		#lcd_AM								; 24h模式下需要灭AM、PM点
-	jsr		F_ClrpSymbol
-	ldx		#lcd_PM
+	ldx		#lcd_PM								; 24h模式下需要灭AM、PM点
 	jsr		F_ClrpSymbol
 	lda		R_Time_Hour
 L_Start_DisTime_Hour:
@@ -56,27 +50,27 @@ L_Start_DisTime_Hour:
 	pha
 	and		#$0f
 	ldx		#lcd_d1
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	pla
 	and		#$f0
 	jsr		L_LSR_4Bit_Prog
 	ldx		#lcd_d0
-	jsr		L_Dis_3Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts 
 
-F_UnDisplay_Time:
-	lda		#0
+F_UnDisplay:
+	lda		#11
 	ldx		#lcd_d0
-	jsr		L_Dis_3Bit_DigitDot_Prog
-	lda		#10
+	jsr		L_Dis_15Bit_DigitDot_Prog
+	lda		#11
 	ldx		#lcd_d1
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#10
+	jsr		L_Dis_15Bit_DigitDot_Prog
+	lda		#11
 	ldx		#lcd_d2
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#10
+	jsr		L_Dis_15Bit_DigitDot_Prog
+	lda		#11
 	ldx		#lcd_d3
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts
 
 
@@ -92,12 +86,12 @@ L_DisDate_Day:
 	lda		Table_DataDot,x
 	pha
 	and		#$0f
-	ldx		#lcd_d8
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	ldx		#lcd_d3
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	pla
 	jsr		L_LSR_4Bit_Prog
-	ldx		#lcd_d9
-	jsr		L_Dis_6Bit_DigitDot_Prog			; 日期的十位是6段
+	ldx		#lcd_d2
+	jsr		L_Dis_15Bit_DigitDot_Prog			; 日期的十位是6段
 	rts
 
 L_DisDate_Month:
@@ -105,69 +99,39 @@ L_DisDate_Month:
 	lda		Table_DataDot,x
 	pha
 	and		#$0f
-	ldx		#lcd_d10
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	ldx		#lcd_d1
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	pla
 	jsr		L_LSR_4Bit_Prog
-	cmp		#$0									; 月份的十位只有1段，所以选择用symbol显示
-	beq		No_Month_Tens
-	ldx		#lcd_d11
-	jsr		F_DispSymbol
-	rts
-No_Month_Tens:
-	ldx		#lcd_d11
-	jsr		F_ClrpSymbol
-L_DisDate_Month_rts:
+
+	ldx		#lcd_d0
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts
 
 L_DisDate_Year:
 	ldx		#00									; 20xx年的开头20是固定的
 	lda		Table_DataDot,x						; 所以20固定会显示
 	ldx		#lcd_d1
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	ldx		#02
 	lda		Table_DataDot,x
 	ldx		#lcd_d0
-	jsr		L_Dis_3Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 
 	ldx		R_Date_Year							; 显示当前的年份
 	lda		Table_DataDot,x
 	pha
 	and		#$0f
 	ldx		#lcd_d3
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	pla
 	and		#$f0
 	jsr		L_LSR_4Bit_Prog
 	ldx		#lcd_d2
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts
 
-F_UnDisplay_Date:								; 闪烁时取消显示用的函数
-	lda		#0
-	ldx		#lcd_d0
-	jsr		L_Dis_3Bit_DigitDot_Prog
-	lda		#10
-	ldx		#lcd_d1
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#10
-	ldx		#lcd_d2
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#10
-	ldx		#lcd_d3
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#10
-	ldx		#lcd_d8
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#0
-	ldx		#lcd_d9
-	jsr		L_Dis_6Bit_DigitDot_Prog
-	lda		#10
-	ldx		#lcd_d10
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	ldx		#lcd_d11
-	jsr		F_ClrpSymbol
-	rts
+
 
 
 ; 显示闹钟设定值函数
@@ -182,12 +146,12 @@ L_DisAlarm_Min:
 	lda		Table_DataDot,x
 	pha
 	and		#$0F
-	ldx		#lcd_d4
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	ldx		#lcd_d3
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	pla
 	jsr		L_LSR_4Bit_Prog
-	ldx		#lcd_d5
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	ldx		#lcd_d2
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts	
 
 L_DisAlarm_Hour:								; 显示闹钟小时
@@ -195,14 +159,14 @@ L_DisAlarm_Hour:								; 显示闹钟小时
 	lda		R_Alarm_Hour
 	cmp		#12
 	bcs		L_Alarm12h_PM						
-	ldx		#lcd_PM2							; 12h模式闹钟AM需要灭PM2
+	ldx		#lcd_PM								; 12h模式闹钟AM需要灭PM
 	jsr		F_ClrpSymbol
 	lda		R_Alarm_Hour						; 显示函数会改A值，重新取变量
 	cmp		#0
 	beq		L_Alarm_0Hour
 	bra		L_Start_DisAlarm_Hour
 L_Alarm12h_PM:
-	ldx		#lcd_PM2							; 12h模式闹钟PM需要亮PM2
+	ldx		#lcd_PM								; 12h模式闹钟PM需要亮PM
 	jsr		F_DispSymbol
 	lda		R_Alarm_Hour						; 显示函数会改A值，重新取变量
 	sec
@@ -214,7 +178,7 @@ L_Alarm_0Hour:									; 12h模式0点需要变成12点
 	bra		L_Start_DisAlarm_Hour
 
 L_24hMode_Alarm:
-	ldx		#lcd_PM2							; 24h模式闹钟需要灭PM2点
+	ldx		#lcd_PM								; 24h模式闹钟需要灭PM
 	jsr		F_ClrpSymbol
 	lda		R_Alarm_Hour
 L_Start_DisAlarm_Hour:
@@ -222,48 +186,27 @@ L_Start_DisAlarm_Hour:
 	lda		Table_DataDot,x
 	pha
 	and		#$0F
-	ldx		#lcd_d6
-	jsr		L_Dis_7Bit_DigitDot_Prog
+	ldx		#lcd_d1
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	pla
 	and		#$F0
 	jsr		L_LSR_4Bit_Prog
-	ldx		#lcd_d7
-	jsr		L_Dis_3Bit_DigitDot_Prog
+	ldx		#lcd_d0
+	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts
 
-F_UnDisplay_Alarm:
-	lda		#10
-	ldx		#lcd_d4
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#10
-	ldx		#lcd_d5
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#10
-	ldx		#lcd_d6
-	jsr		L_Dis_7Bit_DigitDot_Prog
-	lda		#0
-	ldx		#lcd_d7
-	jsr		L_Dis_3Bit_DigitDot_Prog
-	rts
 
 ;显示常亮的符号
 F_Display_Symbol:
-	ldx		#lcd_ALM
+	ldx		#lcd_COL
 	jsr		F_DispSymbol
-	ldx		#lcd_DotA
-	jsr		F_DispSymbol
-	ldx		#lcd_MD
-	jsr		F_DispSymbol
-	ldx		#lcd_SLH
-	jsr		F_DispSymbol
+
 	rts
 
 F_UnDisplay_InDateMode:
-	ldx		#lcd_AM
-	jsr		F_ClrpSymbol
 	ldx		#lcd_PM
 	jsr		F_ClrpSymbol
-	ldx		#lcd_DotC
+	ldx		#lcd_COL
 	jsr		F_ClrpSymbol
 	rts
 
@@ -276,30 +219,16 @@ F_Display_All:
 
 
 F_SymbolRegulate:
-	bbr1	Clock_Flag,L_No_Alarm
-	ldx		#lcd_bell
-	jsr		F_DispSymbol
-	bbr3	Clock_Flag,L_Snz_Juge
-	bbr2	Clock_Flag,L_Loud_Juge_Exit			; Zz常亮条件为Loud!=0 Snz!=1
-L_Snz_Juge:
-	ldx		#lcd_Zz
-	jsr		F_DispSymbol
-L_Loud_Juge_Exit:
-	rts
-L_No_Alarm:
-	ldx		#lcd_Zz
-	jsr		F_ClrpSymbol
-	ldx		#lcd_bell
-	jsr		F_ClrpSymbol
+
 	rts
 
 
 L_LSR_4Bit_Prog:
 	clc
-	ror		
-	ror		
-	ror		
-	ror		
+	ror
+	ror
+	ror
+	ror
 	and		#$0F
 	rts
 

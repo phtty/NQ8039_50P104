@@ -1,5 +1,6 @@
 F_Init_SystemRam:							; 系统初始化
 	lda		#0
+	sta		Frame_Counter
 	sta		Counter_1Hz
 	sta		Counter_16Hz
 	sta		Key_Flag
@@ -70,6 +71,13 @@ F_Port_Init:
 	sta		PA
 	
 	smb4	IER									; 打开PA口外部中断
+
+	lda		PC_DIR
+	ora		#$03
+	sta		PC_DIR
+	lda		PC
+	ora		#$03
+	sta		PC
 
 	lda		PB
 	and		#$fb

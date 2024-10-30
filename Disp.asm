@@ -80,6 +80,240 @@ L_Inc_Dis_Index_Prog_15bit:
 	rts
 
 
+; 计算向上计数的动画帧
+; a == 当前数字 || Frame_Counter帧计数
+L_Frame_TableTrans_Up:
+	clc
+	rol
+	tax
+	sta		P_Temp
+	lda		Table_Digit_15bit,x
+	sta		Table_Digit_LByte
+	inx
+	lda		Table_Digit_15bit,x
+	sta		Table_Digit_HByte
+
+	lda		P_Temp
+	cmp		#09
+	bne		L_Target_NoOverflow_Up
+	lda		#0
+	tax
+	bra		L_Target_get_Up
+L_Target_NoOverflow_Up:
+	inx
+L_Target_get_Up:
+	lda		Table_Digit_15bit,x
+	sta		Target_Digit_LByte
+	inx
+	lda		Table_Digit_15bit,x
+	sta		Target_Digit_HByte
+
+	lda		Frame_Counter
+	clc
+	adc		#1
+	jsr		L_Multiple_3				; n == (FC+1)*3
+	sta		P_Temp
+
+	sec
+	sbc		#1							; m == n-1
+	sta		P_Temp+1
+
+	lda		Frame_Counter
+	clc
+	rol									; q == FC*2
+	sta		P_Temp+2
+	
+L_TableTrans_Loop1_Up:
+	clc
+	ror		Table_Digit_HByte
+	ror		Table_Digit_LByte
+	dec		P_Temp
+	lda		P_Temp
+	bne		L_TableTrans_Loop1_Up
+
+L_TableTrans_Loop2_Up:
+	ror		Target_Digit_HByte
+	ror		Target_Digit_LByte
+	dec		P_Temp+1
+	lda		P_Temp+1
+	bne		L_TableTrans_Loop2_Up
+
+	lda		P_Temp+2
+	tax
+	lda		Table_Digit_15bit_Mask_Up,x
+	sta		P_Temp+4					; masklow
+	inx
+	lda		Table_Digit_15bit_Mask_Up,x
+	sta		P_Temp+5					; maskhigh
+
+	lda		Target_Digit_LByte
+	and		P_Temp+4
+	sta		Target_Digit_LByte
+	lda		Target_Digit_HByte
+	and		P_Temp+5
+	sta		Target_Digit_HByte
+
+	lda		P_Temp+4
+	eor		#$ff
+	sta		P_Temp+4
+	lda		P_Temp+5
+	eor		#$ff
+	sta		P_Temp+5
+
+	lda		Table_Digit_LByte
+	and		P_Temp+4
+	sta		Table_Digit_LByte
+	lda		Table_Digit_HByte
+	and		P_Temp+5
+	sta		Table_Digit_HByte
+
+	lda		Table_Digit_LByte
+	ora		Target_Digit_LByte
+	sta		Table_Digit_LByte
+	lda		Table_Digit_HByte
+	ora		Target_Digit_HByte
+	sta		Table_Digit_HByte
+
+	rts
+
+; 计算向下计数动画帧
+; a == 当前数字 || Frame_Counter帧计数
+L_Frame_TableTrans_Down:
+	clc
+	rol
+	tax
+	sta		P_Temp						; 暂存当前数字
+	lda		Table_Digit_15bit,x
+	sta		Table_Digit_LByte
+	inx
+	lda		Table_Digit_15bit,x
+	sta		Table_Digit_HByte
+
+	lda		P_Temp
+	bne		L_Target_NoOverflow_Down
+	lda		#18
+	tax
+	bra		L_Target_get_Down
+L_Target_NoOverflow_Down:
+	dex									; 目标数字的索引==当前数字索引-3
+	dex
+	dex
+L_Target_get_Down:
+	lda		Table_Digit_15bit,x
+	sta		Target_Digit_LByte
+	inx
+	lda		Table_Digit_15bit,x
+	sta		Target_Digit_HByte
+
+	lda		Frame_Counter
+	clc
+	adc		#1
+	jsr		L_Multiple_3				; n == (FC+1)*3
+	sta		P_Temp
+
+	sec
+	sbc		#1							; m == n-1
+	sta		P_Temp+1
+
+	lda		Frame_Counter
+	clc
+	rol									; q == FC*2
+	sta		P_Temp+2
+	
+L_TableTrans_Loop1_Down:
+	clc
+	rol		Table_Digit_LByte
+	rol		Table_Digit_HByte
+	dec		P_Temp
+	lda		P_Temp
+	bne		L_TableTrans_Loop1_Down
+
+L_TableTrans_Loop2_Down:
+	rol		Target_Digit_LByte
+	rol		Target_Digit_HByte
+	dec		P_Temp+1
+	lda		P_Temp+1
+	bne		L_TableTrans_Loop2_Down
+
+	lda		P_Temp+2
+	tax
+	lda		Table_Digit_15bit_Mask_Down,x
+	sta		P_Temp+4					; masklow
+	inx
+	lda		Table_Digit_15bit_Mask_Down,x
+	sta		P_Temp+5					; maskhigh
+
+	lda		Target_Digit_LByte
+	and		P_Temp+4
+	sta		Target_Digit_LByte
+	lda		Target_Digit_HByte
+	and		P_Temp+5
+	sta		Target_Digit_HByte
+
+	lda		P_Temp+4
+	eor		#$ff
+	sta		P_Temp+4
+	lda		P_Temp+5
+	eor		#$ff
+	sta		P_Temp+5
+
+	lda		Table_Digit_LByte
+	and		P_Temp+4
+	sta		Table_Digit_LByte
+	lda		Table_Digit_HByte
+	and		P_Temp+5
+	sta		Table_Digit_HByte
+
+	lda		Table_Digit_LByte
+	ora		Target_Digit_LByte
+	sta		Table_Digit_LByte
+	lda		Table_Digit_HByte
+	ora		Target_Digit_HByte
+	sta		Table_Digit_HByte
+
+	rts
+
+
+
+L_Dis_15Bit_Frame:
+	stx		P_Temp+1					; 偏移量暂存进P_Temp+2, 腾出X来做变址寻址
+
+	lda		#15
+	sta		P_Temp+2					; 设置显示段数为15
+L_Judge_Dis_15Bit_Frame:				; 显示循环的开始
+	ldx		P_Temp+1					; 表头偏移量->X
+	lda		Lcd_bit,x					; 查表定位目标段的bit位
+	sta		P_Temp+3					; bit位->P_Temp+4
+	lda		Lcd_byte,x					; 查表定位目标段的显存地址
+	tax									; 显存地址偏移->X
+	ror		Table_Digit_HByte			; 循环右移取得目标段是亮或者灭
+	ror		Table_Digit_LByte
+	bcc		L_CLR_15bit_Frame			; 当前段的值若是0则进清点子程序
+	lda		LCD_RamAddr,x				; 将目标段的显存的特定bit位置1来打亮
+	ora		P_Temp+3
+	sta		LCD_RamAddr,x
+	bra		L_Inc_Index_Prog_Frame		; 跳转到显示索引增加的子程序。
+L_CLR_15bit_Frame:	
+	lda		LCD_RamAddr,x				; 加载LCD RAM的地址
+	ora		P_Temp+3					; 将COM和SEG信息与LCD RAM地址进行逻辑或操作
+	eor		P_Temp+3					; 进行异或操作，用于清除对应的段。
+	sta		LCD_RamAddr,x				; 将结果写回LCD RAM，清除对应位置。
+L_Inc_Index_Prog_Frame:
+	inc		P_Temp+1					; 递增偏移量，处理下一个段
+	dec		P_Temp+2					; 递减剩余要显示的段数
+	bne		L_Judge_Dis_15Bit_Frame		; 剩余段数为0则返回
+	rts
+
+
+; a==a*3
+L_Multiple_3:
+	sta		P_Temp
+	clc
+	rol
+	clc
+	adc		P_Temp
+	rts
+
 ;-----------------------------------------
 ;@brief:	单独的画点、清点函数,一般用于MS显示
 ;@para:		X = offset
@@ -119,4 +353,21 @@ Table_Digit_15bit:
 	.word	$4927	; 7
 	.word	$7bef	; 8
 	.word	$79ef	; 9
+	.word	$7b6f	; 0
 	.word	$0000	; undisplay
+
+Table_Digit_15bit_Mask_Up:
+	.word	$0000	; frame 0
+	.word	$7000	; frame 1
+	.word	$7e00	; frame 2
+	.word	$7fc0	; frame 3
+	.word	$7ff8	; frame 4
+	.word	$7fff	; frame 5
+
+Table_Digit_15bit_Mask_Down:
+	.word	$0000	; frame 0
+	.word	$0007	; frame 1
+	.word	$003f	; frame 2
+	.word	$01ff	; frame 3
+	.word	$0fff	; frame 4
+	.word	$7fff	; frame 5

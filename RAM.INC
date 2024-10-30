@@ -20,6 +20,8 @@ LCDRAM					DS		6*6
 
 R_Int_Backup			DS		1
 
+Frame_Counter			DS		1
+
 Counter_1Hz				DS		1
 Counter_16Hz			DS		1
 
@@ -64,6 +66,15 @@ Key_Flag				DS		1
 
 Beep_Serial				DS		1
 ;响铃序列
+
+Table_Digit_LByte		DS		1
+Table_Digit_HByte		DS		1
+
+Target_Digit_LByte		DS		1
+Target_Digit_HByte		DS		1
+
+Mask_LByte				DS		1
+Mask_HByte				DS		1
 
 PA_IO_Backup         	DS		1
 PC_IO_Backup      		DS		1
