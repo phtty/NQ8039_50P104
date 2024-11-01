@@ -12,15 +12,12 @@ Time_Addr		EQU		RamStarAddr+Time_Str_Addr-Page0RamStarAddr ;事件相关数据�
 ;***************************************
 .PAGE0     ;page 0的内存布局
 ;***************************************
-;	ORG	0098H
 ;---------------------------------------------------------------------
 	ORG	0080H
 Page0RamStarAddr		EQU		$
 LCDRAM					DS		6*6
 
 R_Int_Backup			DS		1
-
-Frame_Counter			DS		1
 
 Counter_1Hz				DS		1
 Counter_16Hz			DS		1
@@ -54,15 +51,29 @@ Timer_Flag				DS		1
 
 Sys_Status_Flag			DS		1
 ;bit0 = 1 正常走时
-;bit1 = 1 设置日历
-;bit2 = 1 设置时间
-;bit3 = 1 设置闹钟
+;bit1 = 1 4D模式
+;bit2 = 1 设置小时
+;bit3 = 1 设置分钟
+;bit4 = 1 设置年份
+;bit5 = 1 设置月份
+;bit6 = 1 设置日期
 
 Key_Flag				DS		1
 ;bit0 = 1 扫键标志位
 ;bit1 = 1 首次触发
 ;bit2 = 1 按键处理
 ;bit3 = 1 背光激活
+
+Random_Flag				DS		1
+;bit0 = 1 滚动显示开始
+;bit1 = 1 帧更新
+
+Frame_Serial			DS		1
+
+Frame_Counter_D0		DS		1
+Frame_Counter_D1		DS		1
+Frame_Counter_D2		DS		1
+Frame_Counter_D3		DS		1
 
 Beep_Serial				DS		1
 ;响铃序列
@@ -92,8 +103,15 @@ R_Alarm_Hour			DS		1	;闹钟小时
 R_Snooze_Min			DS		1	;贪睡闹钟分钟
 R_Snooze_Hour			DS		1	;贪睡闹钟小时
 
+R_Seed0					DS		1
+R_Seed1					DS		1
+R_Seed2					DS		1
+R_Seed3					DS		1
+
+CC0						DS		1
+
 ;---------------------------------------       
-P_Temp					DS	16	
+P_Temp					DS		16	
 ;---------------------------------------
 ;---------------------------------------
 ;***************************************

@@ -195,6 +195,34 @@ L_Start_DisAlarm_Hour:
 	jsr		L_Dis_15Bit_DigitDot_Prog
 	rts
 
+F_Display_RandomNum:	
+	ldx		R_Seed0
+	lda		Table_DataDot,x
+	pha
+	and		#$0f
+	ldx		#lcd_d3
+	jsr		L_Dis_15Bit_DigitDot_Prog
+	pla
+	jsr		L_LSR_4Bit_Prog
+	and		#$0f
+	ldx		#lcd_d2
+	jsr		L_Dis_15Bit_DigitDot_Prog
+
+	ldx		R_Seed1
+	lda		Table_DataDot,x
+	pha
+	and		#$0f
+	ldx		#lcd_d1
+	jsr		L_Dis_15Bit_DigitDot_Prog
+	pla
+	jsr		L_LSR_4Bit_Prog
+	and		#$0f
+	ldx		#lcd_d0
+	jsr		L_Dis_15Bit_DigitDot_Prog
+	
+	rts
+
+
 
 ;显示常亮的符号
 F_Display_Symbol:
@@ -211,10 +239,7 @@ F_UnDisplay_InDateMode:
 	rts
 
 F_Display_All:
-	jsr		F_Display_Symbol
-	jsr		F_Display_Date
-	jsr		F_Display_Alarm
-	jsr		F_Display_Time
+
 	rts
 
 

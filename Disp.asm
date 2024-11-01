@@ -79,6 +79,17 @@ L_Inc_Dis_Index_Prog_15bit:
 	bne		L_Judge_Dis_15Bit_DigitDot	; 剩余段数为0则返回
 	rts
 
+; 显示动画帧
+; a==当前数字  x==位选  Frame_Counter帧计数
+F_Dis_Animation_Frame:
+	txa									; 位选x入栈
+	pha
+	jsr		L_Frame_TableTrans_Down
+	pla
+	tax									; 位选x出栈
+	jsr		L_Dis_15Bit_Frame
+	rts
+
 
 ; 计算向上计数的动画帧
 ; a == 当前数字 || Frame_Counter帧计数

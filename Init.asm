@@ -72,11 +72,11 @@ F_Port_Init:
 	
 	smb4	IER									; 打开PA口外部中断
 
-	lda		PC_DIR
-	ora		#$03
+	lda		PC_DIR								; PC0、1配置为输出，初始值为高
+	and		#$fc
 	sta		PC_DIR
 	lda		PC
-	ora		#$03
+	and		#$fd
 	sta		PC
 
 	lda		PB
@@ -103,16 +103,17 @@ F_Timer_Init:
 
 	lda		#$0									; 重装载计数设置为0
 	sta		TMR0
+	lda		#$0
 	sta		TMR2
 
 	lda		#$bf								; 8Hz一次中断
 	sta		TMR1
 
 	lda		IER									; 开定时器中断
-	ora		#C_TMR0I+C_TMR1I+C_TMR2I
+	ora		#C_TMR1I+C_TMR2I+C_LCDI
 	sta		IER
 
-	rmb0	TMRC								; 初始化只开TIM2走时
+	smb0	TMRC								; 初始化只开TIM2用于走时
 	rmb1	TMRC
 	smb2	TMRC
 

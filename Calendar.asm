@@ -91,11 +91,11 @@ L_Get_Weak_YearFirstDay:
 
 L_MOD_7:
 	cmp		#7
-	bcc		L_MOD_Over
+	bcc		L_MOD_7Over
 	sec
 	sbc		#7
 	bra		L_MOD_7
-L_MOD_Over:
+L_MOD_7Over:
 	rts
 
 

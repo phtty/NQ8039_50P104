@@ -45,6 +45,11 @@ L_Clear_Ram_Loop:
 	jsr		F_LCD_Init
 	jsr		F_Port_Init
 
+	jsr		F_RandomSeed0_Get
+	jsr		F_RandomSeed1_Get
+	jsr		F_RandomSeed2_Get
+	jsr		F_RandomSeed3_Get
+
 	lda		#$07									; 系统时钟和中断使能
 	sta		SYSCLK
 
@@ -52,16 +57,6 @@ L_Clear_Ram_Loop:
 
 	cli												; 开总中断
 
-	lda		#5
-	sta		Frame_Counter							; 设置帧计数
-	lda		#9
-	jsr		L_Frame_TableTrans_Up					; 选择起始数字
-	ldx		#lcd_d1
-	jsr		L_Dis_15Bit_Frame
-
-	rmb0	Key_Flag
-	;jsr		F_Test_Mode
-	;jsr		F_Display_Symbol
 
 
 ; 状态机
@@ -73,18 +68,18 @@ MainLoop:
 
 Status_Juge:
 	bbs0	Sys_Status_Flag,Status_Runtime
-	bbs1	Sys_Status_Flag,Status_Calendar_Set
+	bbs1	Sys_Status_Flag,Status_4D_Mode
 	bbs2	Sys_Status_Flag,Status_Time_Set
 	bbs3	Sys_Status_Flag,Status_Alarm_Set
 	bra		MainLoop
 Status_Runtime:
-	;jsr		F_KeyTrigger_RunTimeMode			; RunTime模式下按键逻辑
+	jsr		F_KeyTrigger_RunTimeMode				; RunTime模式下按键逻辑
 	;jsr		F_DisTime_Run
 	;jsr		F_Alarm_Handler						; 只在RunTime模式下才会响闹
 	sta		HALT
 	bra		MainLoop
-Status_Calendar_Set:
-	;jsr		F_KeyTrigger_DateSetMode			; DateSet模式下按键逻辑
+Status_4D_Mode:
+	jsr		F_KeyTrigger_4DMode						; 4D模式下按键逻辑
 	;jsr		F_DisCalendar_Set
 	sta		HALT
 	bra		MainLoop
@@ -106,7 +101,7 @@ V_IRQ:
 	pha
 	lda		IER
 	and		IFR
-	sta		R_Int_Backup	
+	sta		R_Int_Backup
 
 	bbs0	R_Int_Backup,L_DivIrq
 	bbs1	R_Int_Backup,L_Timer0Irq
@@ -165,9 +160,14 @@ L_PaIrq:
 
 	smb1	TMRC								; 打开快加定时
 
+	jsr		F_RandomSeed0_Get
+	jsr		F_RandomSeed2_Get
+
 	bra		L_EndIrq
 
 L_LcdIrq:
+	inc		CC0
+	smb1	Random_Flag							; 帧更新标志位
 	CLR_LCD_IRQ_FLAG
 
 L_EndIrq:
@@ -175,7 +175,7 @@ L_EndIrq:
 	rti
 
 
-;.include	ScanKey.asm
+.include	ScanKey.asm
 ;.include	Time.asm
 ;.include	Calendar.asm
 ;.include	Alarm.asm
