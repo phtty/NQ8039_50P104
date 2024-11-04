@@ -1,6 +1,8 @@
 F_Init_SystemRam:							; 系统初始化
 	lda		#0
 	sta		Frame_Counter
+	sta		Frame_Serial
+	sta		Anim_Phase
 	sta		Counter_1Hz
 	sta		Counter_16Hz
 	sta		Key_Flag

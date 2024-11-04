@@ -81,6 +81,7 @@ Status_Runtime:
 Status_4D_Mode:
 	jsr		F_KeyTrigger_4DMode						; 4D模式下按键逻辑
 	;jsr		F_DisCalendar_Set
+	jsr		F_Display_Random_Rolling
 	sta		HALT
 	bra		MainLoop
 Status_Time_Set:
@@ -166,9 +167,9 @@ L_PaIrq:
 	bra		L_EndIrq
 
 L_LcdIrq:
+	CLR_LCD_IRQ_FLAG
 	inc		CC0
 	smb1	Random_Flag							; 帧更新标志位
-	CLR_LCD_IRQ_FLAG
 
 L_EndIrq:
 	pla

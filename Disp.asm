@@ -79,6 +79,7 @@ L_Inc_Dis_Index_Prog_15bit:
 	bne		L_Judge_Dis_15Bit_DigitDot	; 剩余段数为0则返回
 	rts
 
+
 ; 显示动画帧
 ; a==当前数字  x==位选  Frame_Counter帧计数
 F_Dis_Animation_Frame:
@@ -104,7 +105,7 @@ L_Frame_TableTrans_Up:
 	lda		Table_Digit_15bit,x
 	sta		Table_Digit_HByte
 
-	lda		P_Temp
+	lda		P_Temp						; 判断是否是从9->0
 	cmp		#09
 	bne		L_Target_NoOverflow_Up
 	lda		#0
@@ -200,7 +201,7 @@ L_Frame_TableTrans_Down:
 	lda		Table_Digit_15bit,x
 	sta		Table_Digit_HByte
 
-	lda		P_Temp
+	lda		P_Temp						; 判断是否是0->9
 	bne		L_Target_NoOverflow_Down
 	lda		#18
 	tax

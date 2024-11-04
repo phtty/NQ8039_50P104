@@ -172,18 +172,7 @@ L_KeyLTrigger_4DMode:
 	rts
 
 L_KeyDTrigger_4DMode:
-	lda		R_Seed0
-	ldx		#lcd_d0
-	jsr		L_Dis_15Bit_DigitDot_Prog
-	lda		R_Seed1
-	ldx		#lcd_d1
-	jsr		L_Dis_15Bit_DigitDot_Prog
-	lda		R_Seed2
-	ldx		#lcd_d2
-	jsr		L_Dis_15Bit_DigitDot_Prog
-	lda		R_Seed3
-	ldx		#lcd_d3
-	jsr		L_Dis_15Bit_DigitDot_Prog
+	smb0	Random_Flag							; 开始滚动动画
 
 	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
