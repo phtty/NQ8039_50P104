@@ -33,11 +33,11 @@ F_Init_SystemRam:							; 系统初始化
 	lda		#00
 	sta		R_Alarm_Min
 
-	lda		#01
+	lda		#05
 	sta		R_Date_Day
-	lda		#01
+	lda		#11
 	sta		R_Date_Month
-	lda		#07
+	lda		#24
 	sta		R_Date_Year
 	lda		#00
 	sta		R_Date_Week

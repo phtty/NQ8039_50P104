@@ -57,41 +57,58 @@ L_Clear_Ram_Loop:
 
 	cli												; 开总中断
 
+	jsr		L_DisDate_Week
+
 
 
 ; 状态机
 MainLoop:
-	;jsr		F_Time_Run							; 走时全局生效
-	;jsr		F_Backlight							; 背光全局生效
-	;jsr		F_Louding							; 响铃处理全局生效
-	;jsr		F_SymbolRegulate
+	jsr		F_Time_Run							; 走时全局生效
+	jsr		F_Backlight							; 背光全局生效
+	jsr		F_SymbolRegulate
 
 Status_Juge:
 	bbs0	Sys_Status_Flag,Status_Runtime
 	bbs1	Sys_Status_Flag,Status_4D_Mode
-	bbs2	Sys_Status_Flag,Status_Time_Set
-	bbs3	Sys_Status_Flag,Status_Alarm_Set
+	bbs2	Sys_Status_Flag,Status_TimeMode_Set
+	bbs3	Sys_Status_Flag,Status_Hour_Set
+	bbs4	Sys_Status_Flag,Status_Min_Set
+	bbs5	Sys_Status_Flag,Status_Year_Set
+	bbs6	Sys_Status_Flag,Status_Month_Set
+	bbs7	Sys_Status_Flag,Status_Day_Set
 	bra		MainLoop
 Status_Runtime:
 	jsr		F_KeyTrigger_RunTimeMode				; RunTime模式下按键逻辑
-	;jsr		F_DisTime_Run
-	;jsr		F_Alarm_Handler						; 只在RunTime模式下才会响闹
+	jsr		F_DisTime_Run
 	sta		HALT
 	bra		MainLoop
 Status_4D_Mode:
 	jsr		F_KeyTrigger_4DMode						; 4D模式下按键逻辑
-	;jsr		F_DisCalendar_Set
 	jsr		F_Display_Random_Rolling
 	sta		HALT
 	bra		MainLoop
-Status_Time_Set:
-	;jsr		F_KeyTrigger_TimeSetMode			; TimeSet模式下按键逻辑
-	;jsr		F_DisTime_Set
+Status_TimeMode_Set:
+	
 	sta		HALT
 	bra		MainLoop
-Status_Alarm_Set:
-	;jsr		F_KeyTrigger_AlarmSetMode			; AlarmSet模式下按键逻辑
-	;jsr		F_DisAlarm_Set
+Status_Hour_Set:
+	
+	sta		HALT
+	bra		MainLoop
+Status_Min_Set:
+
+	sta		HALT
+	bra		MainLoop
+Status_Year_Set:
+
+	sta		HALT
+	bra		MainLoop
+Status_Month_Set:
+
+	sta		HALT
+	bra		MainLoop
+Status_Day_Set:
+
 	sta		HALT
 	bra		MainLoop
 
@@ -129,7 +146,7 @@ L_1Hz_Out:
 	lda		#$0
 	sta		Counter_1Hz
 	lda		Timer_Flag
-	ora		#10100110B							; 1S、增S、背光、响铃的1S标志位
+	ora		#10100110B							; 1S、增S、背光、4D的1S标志位
 	sta		Timer_Flag
 	bra		L_EndIrq
 
@@ -183,10 +200,10 @@ L_EndIrq:
 
 
 .include	ScanKey.asm
-;.include	Time.asm
-;.include	Calendar.asm
+.include	Time.asm
+.include	Calendar.asm
 ;.include	Alarm.asm
-;.include	Backlight.asm
+.include	Backlight.asm
 .include	Init.asm
 .include	Disp.asm
 .include	Display.asm

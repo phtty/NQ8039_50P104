@@ -54,16 +54,16 @@ L_KeyDTrigger_RunTimeMode:
 	sta		Sys_Status_Flag
 	lda		#0
 	ldx		#lcd_d0
-	jsr		L_Dis_15Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot
 	lda		#0
 	ldx		#lcd_d1
-	jsr		L_Dis_15Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot
 	lda		#0
 	ldx		#lcd_d2
-	jsr		L_Dis_15Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot
 	lda		#0
 	ldx		#lcd_d3
-	jsr		L_Dis_15Bit_DigitDot_Prog
+	jsr		L_Dis_15Bit_DigitDot
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
 	rts

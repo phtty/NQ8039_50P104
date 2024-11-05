@@ -41,7 +41,7 @@ L_FillLcd:
 ;			X = offset	
 ;@impact:	P_Temp，P_Temp+1，P_Temp+2，P_Temp+3, X，A
 ;===========================================================
-L_Dis_15Bit_DigitDot_Prog:
+L_Dis_15Bit_DigitDot:
 	stx		P_Temp+2					; 偏移量暂存进P_Temp+2, 腾出X来做变址寻址
 
 	clc
@@ -78,6 +78,43 @@ L_Inc_Dis_Index_Prog_15bit:
 	dec		P_Temp+3					; 递减剩余要显示的段数
 	bne		L_Judge_Dis_15Bit_DigitDot	; 剩余段数为0则返回
 	rts
+
+
+
+; 用于显示星期的七段数显
+L_Dis_7Bit_WeekDot:
+	stx		P_Temp+1					; 偏移量暂存进P_Temp+1, 腾出X来做变址寻址
+
+	ldx		R_Date_Week					; 取得当前星期数
+	lda		Table_Digit_7bit,x			; 将显示的数字通过查表找到对应的段码存进A
+	sta		P_Temp						; 暂存段码值到P_Temp
+
+	lda		#7
+	sta		P_Temp+2					; 设置显示段数为7
+L_Judge_Dis_7Bit_WeekDot:				; 显示循环的开始
+	ldx		P_Temp+1					; 取回偏移量作为索引
+	lda		Lcd_bit,x					; 查表定位目标段的bit位
+	sta		P_Temp+3	
+	lda		Lcd_byte,x					; 查表定位目标段的显存地址
+	tax
+	ror		P_Temp						; 循环右移取得目标段是亮或者灭
+	bcc		L_CLR_7bit					; 当前段的值若是0则进清点子程序
+	lda		LCD_RamAddr,x				; 将目标段的显存的特定bit位置1来打亮
+	ora		P_Temp+3
+	sta		LCD_RamAddr,x
+	bra		L_Inc_Dis_Index_Prog_7bit	; 跳转到显示索引增加的子程序
+L_CLR_7bit:
+	lda		LCD_RamAddr,x				; 加载LCD RAM的地址
+	ora		P_Temp+3					; 先将指定bit用或操作置1
+	eor		P_Temp+3					; 然后异或操作翻转置0
+	sta		LCD_RamAddr,x				; 将结果写回LCD RAM，清除对应位置
+L_Inc_Dis_Index_Prog_7bit:
+	inc		P_Temp+1					; 递增偏移量，处理下一个段
+	dec		P_Temp+2					; 递减剩余要显示的段数
+	bne		L_Judge_Dis_7Bit_WeekDot	; 剩余段数为0则返回
+	rts
+
+
 
 
 ; 显示动画帧
@@ -331,26 +368,26 @@ L_Multiple_3:
 ;-----------------------------------------
 ;@brief:	单独的画点、清点函数,一般用于MS显示
 ;@para:		X = offset
-;@impact:	A, X, P_Temp+2
+;@impact:	A, X, P_Temp
 ;-----------------------------------------
-F_DispSymbol:
-	jsr		F_DispSymbol_Com
+F_DisSymbol:
+	jsr		F_DisSymbol_Com
 	sta		LCD_RamAddr,x				; 画点
 	rts
 
-F_ClrpSymbol:
-	jsr		F_DispSymbol_Com			; 清点
-	eor		P_Temp+2
+F_ClrSymbol:
+	jsr		F_DisSymbol_Com				; 清点
+	eor		P_Temp
 	sta		LCD_RamAddr,x
 	rts
 
-F_DispSymbol_Com:
+F_DisSymbol_Com:
 	lda		Lcd_bit,x					; 查表得知目标段的bit位
-	sta		P_Temp+2
+	sta		P_Temp
 	lda		Lcd_byte,x					; 查表得知目标段的地址
 	tax
 	lda		LCD_RamAddr,x				; 将目标段的显存的特定bit位置1来打亮
-	ora		P_Temp+2
+	ora		P_Temp
 	rts
 
 
@@ -385,3 +422,13 @@ Table_Digit_15bit_Mask_Down:
 	.word	$01ff	; frame 3
 	.word	$0fff	; frame 4
 	.word	$7fff	; frame 5
+
+Table_Digit_7bit:
+	.byte	$01		; SUN
+	.byte	$02		; MON
+	.byte	$04		; TUE
+	.byte	$08		; WED
+	.byte	$10		; THU
+	.byte	$20		; FRI
+	.byte	$40		; SAT
+	.byte	$00		; undisplay

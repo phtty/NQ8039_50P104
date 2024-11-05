@@ -33,56 +33,70 @@ F_DisTime_Run:
 L_TimeDot_Out:
 	rmb0	Timer_Flag
 	bbs1	Timer_Flag,L_Dot_Clear
-	bbr1	Clock_Flag,L_Snooze_Blink1			; Alarm
-	bbs2	Clock_Flag,L_Snooze_Blink1			; Loud
-	bbr3	Clock_Flag,L_Snooze_Blink1			; Snooze	
-	ldx		#lcd_Zz								; Zz闪烁条件:
-	jsr		F_DispSymbol						; Snooze==1 && loud==0 && Alarm==1
 L_Snooze_Blink1:
-	ldx		#lcd_DotC							; 没1S亮点
-	jsr		F_DispSymbol
+	ldx		#lcd_COL							; 没1S亮点
+	jsr		F_DisSymbol
 	jsr		F_Display_Time
 	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则调用显示日期函数
 	rmb1	Calendar_Flag
-	jsr		F_Display_Date
+	jsr		L_DisDate_Week
 	rts											; 半S触发时没1S标志不走时，直接返回
 L_Dot_Clear:
 	rmb1	Timer_Flag							; 清1S标志
-	ldx		#lcd_DotC							; 1S触发后必定进灭点，同时走时
-	jsr		F_ClrpSymbol
-	bbr1	Clock_Flag,L_Snooze_Blink2			; Alarm
-	bbs2	Clock_Flag,L_Snooze_Blink2			; Loud
-	bbr3	Clock_Flag,L_Snooze_Blink2			; Snooze	
-	ldx		#lcd_Zz								; Zz闪烁条件:
-	jsr		F_ClrpSymbol						; Snooze==1 && loud==0
+	ldx		#lcd_COL							; 1S触发后必定进灭点，同时走时
+	jsr		F_ClrSymbol
 L_Snooze_Blink2:
 	jsr		F_Display_Time
-	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则调用显示日期函数
+	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则显示更新后的星期
 	rmb1	Calendar_Flag
-	jsr		F_Display_Date
+	jsr		L_DisDate_Week
 No_Date_Add:
 	rts
 
 
-F_DisTime_Set:
-	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Time	; 有按键时不闪烁
-	bbs0	Timer_Flag,L_Blink_Time				; 没有半S标志时不闪烁
+F_DisHour_Set:
+	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Hour	; 有按键时不闪烁
+	bbs0	Timer_Flag,L_Blink_Hour				; 没有半S标志时不闪烁
 	rts
-L_Blink_Time:
+L_Blink_Hour:
 	rmb0	Timer_Flag							; 清半S标志
-	bbr1	Calendar_Flag,L_No_Date_Add_TS
+	bbr1	Calendar_Flag,L_No_Date_Add_HS
 	rmb1	Calendar_Flag
-	jsr		F_Display_Date
-L_No_Date_Add_TS:
-	bbs1	Timer_Flag,L_Time_Clear
-L_KeyTrigger_NoBlink_Time:
-	jsr		F_Display_Time						; 半S亮
-	ldx		#lcd_DotC
-	jsr		F_DispSymbol
+	jsr		L_DisDate_Week
+L_No_Date_Add_HS:
+	bbs1	Timer_Flag,L_Hour_Clear
+L_KeyTrigger_NoBlink_Hour:
+	jsr		L_DisTime_Hour						; 半S亮
+	ldx		#lcd_COL
+	jsr		F_DisSymbol
 	rts
-L_Time_Clear:
+L_Hour_Clear:
 	rmb1	Timer_Flag
-	jsr		F_UnDisplay_Time					; 1S灭
-	ldx		#lcd_DotC
-	jsr		F_ClrpSymbol
+	jsr		F_UnDisplay_Hour					; 1S灭
+	ldx		#lcd_COL
+	jsr		F_ClrSymbol
+	rts
+
+
+F_DisMin_Set:
+	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Min	; 有按键时不闪烁
+	bbs0	Timer_Flag,L_Blink_Min				; 没有半S标志时不闪烁
+	rts
+L_Blink_Min:
+	rmb0	Timer_Flag							; 清半S标志
+	bbr1	Calendar_Flag,L_No_Date_Add_MS
+	rmb1	Calendar_Flag
+	jsr		L_DisDate_Week
+L_No_Date_Add_MS:
+	bbs1	Timer_Flag,L_Min_Clear
+L_KeyTrigger_NoBlink_Min:
+	jsr		L_DisTime_Min						; 半S亮
+	ldx		#lcd_COL
+	jsr		F_DisSymbol
+	rts
+L_Min_Clear:
+	rmb1	Timer_Flag
+	jsr		F_UnDisplay_Min						; 1S灭
+	ldx		#lcd_COL
+	jsr		F_ClrSymbol
 	rts

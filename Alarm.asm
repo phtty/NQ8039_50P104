@@ -10,7 +10,7 @@ L_No_Date_Add_AS:
 	bbs1	Timer_Flag,L_Alarm_Clear
 	jsr		F_Display_Alarm						; 半S亮
 	ldx		#lcd_DotC
-	jsr		F_DispSymbol
+	jsr		F_DisSymbol
 	rts
 L_Alarm_Clear:
 	rmb1	Timer_Flag
@@ -18,7 +18,7 @@ L_Alarm_Clear:
 	jsr		F_UnDisplay_Alarm					; 1S灭
 L_KeyYes_NoBlink_Alarm:
 	ldx		#lcd_DotC
-	jsr		F_ClrpSymbol
+	jsr		F_ClrSymbol
 	jsr		F_Display_Time
 	rts
 

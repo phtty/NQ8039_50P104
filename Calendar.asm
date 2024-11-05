@@ -55,7 +55,7 @@ L_GetWeek:
 	ldx		R_Date_Day
 	dex												; 当前日期-1->A
 	txa
-	jsr		L_MOD_7
+	jsr		L_MOD_A_7
 	sta		P_Temp									; 当前日期相对月首日的星期数偏移量->P_Temp
 
 	ldx		R_Date_Month
@@ -77,43 +77,76 @@ L_Get_Week:
 	and		#0111B									; 偶数年份取低4位
 	bra		L_Get_Weak_YearFirstDay
 L_Odd_Year:
-	jsr		L_LSR_4Bit_Prog
+	jsr		L_LSR_4Bit
 	and		#0111B									; 奇数年份取高4位
 L_Get_Weak_YearFirstDay:
 	clc
 	adc		P_Temp
 	clc
 	adc		P_Temp+1								; 当前年首日的星期数+总偏移==当前星期数
-	jsr		L_MOD_7
+	jsr		L_MOD_A_7
 	sta		R_Date_Week
 	rts
 
 
-L_MOD_7:
+L_MOD_A_7:
 	cmp		#7
-	bcc		L_MOD_7Over
+	bcc		L_MOD_A_7Over
 	sec
 	sbc		#7
-	bra		L_MOD_7
-L_MOD_7Over:
+	bra		L_MOD_A_7
+L_MOD_A_7Over:
 	rts
 
 
-F_DisCalendar_Set:
+F_DisYear_Set:
 	lda		Key_Flag
-	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Date	; 有按键时不闪烁
-	bbs0	Timer_Flag,L_Blink_Date				; 没有半S标志不闪烁
+	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Year	; 有按键时不闪烁
+	bbs0	Timer_Flag,L_Blink_Year				; 没有半S标志不闪烁
 	rts
-L_Blink_Date:
+L_Blink_Year:
 	rmb0	Timer_Flag							; 清半S标志
-	bbs1	Timer_Flag,L_Date_Clear				; 有1S标志时灭
-L_KeyTrigger_NoBlink_Date:
+	bbs1	Timer_Flag,L_Year_Clear				; 有1S标志时灭
+L_KeyTrigger_NoBlink_Year:
 	jsr		L_DisDate_Year
-	jsr		F_Display_Date
-	rts	
-L_Date_Clear:
+	rts
+L_Year_Clear:
 	rmb1	Timer_Flag							; 清1S标志
-	jsr		F_UnDisplay_Date
+	jsr		F_UnDisplay_Year
+	rts
+
+
+F_DisMonth_Set:
+	lda		Key_Flag
+	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Month	; 有按键时不闪烁
+	bbs0	Timer_Flag,L_Blink_Month				; 没有半S标志不闪烁
+	rts
+L_Blink_Month:
+	rmb0	Timer_Flag							; 清半S标志
+	bbs1	Timer_Flag,L_Month_Clear				; 有1S标志时灭
+L_KeyTrigger_NoBlink_Month:
+	jsr		L_DisDate_Month
+	rts	
+L_Month_Clear:
+	rmb1	Timer_Flag							; 清1S标志
+	jsr		F_UnDisplay_Month
+	rts
+
+
+F_DisDay_Set:
+	lda		Key_Flag
+	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Day	; 有按键时不闪烁
+	bbs0	Timer_Flag,L_Blink_Day				; 没有半S标志不闪烁
+	rts
+L_Blink_Day:
+	rmb0	Timer_Flag							; 清半S标志
+	bbs1	Timer_Flag,L_Day_Clear				; 有1S标志时灭
+L_KeyTrigger_NoBlink_Day:
+	jsr		L_DisDate_Day
+	rts	
+L_Day_Clear:
+	rmb1	Timer_Flag							; 清1S标志
+	jsr		F_UnDisplay_Day
 	rts
 
 

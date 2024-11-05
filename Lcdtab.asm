@@ -116,13 +116,14 @@ lcd_d3	equ	$-lcd_table1
 	db_c_s	c3,s42	; D15
 
 lcd_dot:
+lcd_week	equ	$-lcd_table1
 lcd_SUN		equ	$-lcd_table1
 	db_c_s	c0,s4	; SUN
 lcd_MON		equ	$-lcd_table1
 	db_c_s	c0,s5	; MON
-lcd_TUE	equ	$-lcd_table1
+lcd_TUE		equ	$-lcd_table1
 	db_c_s	c0,s6	; TUE
-lcd_WED	equ	$-lcd_table1
+lcd_WED		equ	$-lcd_table1
 	db_c_s	c0,s7	; WED
 lcd_THU		equ	$-lcd_table1
 	db_c_s	c0,s8	; THU
@@ -130,7 +131,7 @@ lcd_FRI		equ	$-lcd_table1
 	db_c_s	c0,s9	; FRI
 lcd_SAT		equ	$-lcd_table1
 	db_c_s	c0,s10	; SAT
-lcd_D	equ	$-lcd_table1
+lcd_D		equ	$-lcd_table1
 	db_c_s	c0,s3	; D
 lcd_PM		equ	$-lcd_table1
 	db_c_s	c0,s2	; PM

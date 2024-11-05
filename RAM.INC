@@ -51,16 +51,17 @@ Timer_Flag				DS		1
 ;bit4 = 1 Timer1 8Hz计时
 ;bit5 = 1 Timer2 背光1S计时
 ;bit6 = 1 Timer0 16Hz标志
-;bit7 = 1 Timer2 响铃1S计时
+;bit7 = 1 Timer2 4D 1S计时
 
 Sys_Status_Flag			DS		1
 ;bit0 = 1 正常走时
 ;bit1 = 1 4D模式
-;bit2 = 1 设置小时
-;bit3 = 1 设置分钟
-;bit4 = 1 设置年份
-;bit5 = 1 设置月份
-;bit6 = 1 设置日期
+;bit2 = 1 12h/24h切换
+;bit3 = 1 设置小时
+;bit4 = 1 设置分钟
+;bit5 = 1 设置年份
+;bit6 = 1 设置月份
+;bit7 = 1 设置日期
 
 Key_Flag				DS		1
 ;bit0 = 1 扫键标志位
