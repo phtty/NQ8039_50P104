@@ -2,9 +2,14 @@ F_Init_SystemRam:							; 系统初始化
 	lda		#0
 	sta		Frame_Counter
 	sta		Frame_Serial
+	sta		Frame_Counter_D0
+	sta		Frame_Counter_D1
+	sta		Frame_Counter_D2
+	sta		Frame_Counter_D3
 	sta		Anim_Phase
 	sta		Counter_1Hz
 	sta		Counter_16Hz
+	sta		Counter_Lcd
 	sta		Key_Flag
 	sta		Timer_Flag
 	sta		Clock_Flag
@@ -112,7 +117,7 @@ F_Timer_Init:
 	sta		TMR1
 
 	lda		IER									; 开定时器中断
-	ora		#C_TMR1I+C_TMR2I+C_LCDI
+	ora		#C_TMR0I+C_TMR1I+C_TMR2I+C_LCDI
 	sta		IER
 
 	smb0	TMRC								; 初始化只开TIM2用于走时

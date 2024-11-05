@@ -83,8 +83,10 @@ L_Inc_Dis_Index_Prog_15bit:
 ; 显示动画帧
 ; a==当前数字  x==位选  Frame_Counter帧计数
 F_Dis_Animation_Frame:
+	sta		P_Temp						; 当前数字暂存
 	txa									; 位选x入栈
 	pha
+	lda		P_Temp						; 取出当前数字
 	jsr		L_Frame_TableTrans_Down
 	pla
 	tax									; 位选x出栈
@@ -286,7 +288,7 @@ L_TableTrans_Loop2_Down:
 	rts
 
 
-
+; x==位选
 L_Dis_15Bit_Frame:
 	stx		P_Temp+1					; 偏移量暂存进P_Temp+2, 腾出X来做变址寻址
 

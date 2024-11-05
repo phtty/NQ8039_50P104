@@ -169,6 +169,12 @@ L_PaIrq:
 L_LcdIrq:
 	CLR_LCD_IRQ_FLAG
 	inc		CC0
+	inc		Counter_Lcd
+	lda		Counter_Lcd
+	cmp		#1
+	bne		L_EndIrq
+	lda		#0
+	sta		Counter_Lcd
 	smb1	Random_Flag							; 帧更新标志位
 
 L_EndIrq:

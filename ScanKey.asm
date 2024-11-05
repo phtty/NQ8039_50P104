@@ -156,9 +156,10 @@ L_KeyExit_4DMode:
 	rmb0	Key_Flag							; 清相关标志位
 	rmb3	Timer_Flag
 	lda		#0									; 清理相关变量
+	bbs2	Random_Flag,L_Key8HzExit_4DMode		; 在滚动随机数时，停止随机数变更
 	sta		QuickAdd_Counter
-	jsr			F_RandomSeed1_Get
-	jsr			F_RandomSeed3_Get
+	jsr		F_RandomSeed1_Get
+	jsr		F_RandomSeed3_Get
 L_Key8HzExit_4DMode:
 	rts
 
@@ -173,6 +174,9 @@ L_KeyLTrigger_4DMode:
 
 L_KeyDTrigger_4DMode:
 	smb0	Random_Flag							; 开始滚动动画
+	smb2	Random_Flag							; 停止采样随机数
+	jsr		F_RandomSeed0_Get
+	jsr		F_RandomSeed2_Get
 
 	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键

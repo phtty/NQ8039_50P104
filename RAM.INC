@@ -24,6 +24,7 @@ Anim_Phase				DS		1
 
 Counter_1Hz				DS		1
 Counter_16Hz			DS		1
+Counter_Lcd				DS		1
 
 QuickAdd_Counter		DS		1
 Backlight_Counter		DS		1
@@ -70,6 +71,7 @@ Key_Flag				DS		1
 Random_Flag				DS		1
 ;bit0 = 1 滚动显示开始
 ;bit1 = 1 帧更新
+;bit2 = 1 停止随机数采样
 
 Frame_Serial			DS		1
 
