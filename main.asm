@@ -57,7 +57,6 @@ L_Clear_Ram_Loop:
 
 	cli												; 开总中断
 
-	jsr		L_DisDate_Week
 
 
 
@@ -80,19 +79,25 @@ Status_Juge:
 Status_Runtime:
 	jsr		F_KeyTrigger_RunTimeMode				; RunTime模式下按键逻辑
 	jsr		F_DisTime_Run
+	jsr		L_DisDate_Week
 	sta		HALT
 	bra		MainLoop
 Status_4D_Mode:
 	jsr		F_KeyTrigger_4DMode						; 4D模式下按键逻辑
 	jsr		F_Display_Random_Rolling
+	jsr		F_4DMode_Juge							; 判断是否应当退出4D模式
 	sta		HALT
 	bra		MainLoop
 Status_TimeMode_Set:
-	
+	jsr		F_KeyTrigger_TimeMode_Set				; 12/24h切换下的按键逻辑
+	jsr		F_DisTimeMode_Set
+	jsr		L_DisDate_Week
 	sta		HALT
 	bra		MainLoop
 Status_Hour_Set:
-	
+	jsr		F_KeyTrigger_Hour_Set					; 12/24h切换下的按键逻辑
+	jsr		F_DisHour_Set
+	jsr		L_DisDate_Week
 	sta		HALT
 	bra		MainLoop
 Status_Min_Set:

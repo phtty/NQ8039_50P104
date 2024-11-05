@@ -414,6 +414,29 @@ L_Display_D3_InPhase_Exit:
 
 
 
+F_4DMode_Juge:
+	bbr4	Key_Flag,L_4DMode_Juge_Exit
+	bbr7	Timer_Flag,L_4DMode_Juge_Exit
+
+	rmb7	Timer_Flag
+	lda		4DMode_Counter
+	cmp		#31
+	bcs		L_4DMode_Stop
+	inc		4DMode_Counter
+	bra		L_4DMode_Juge_Exit
+L_4DMode_Stop:
+	lda		#0
+	sta		4DMode_Counter
+	rmb4	Key_Flag
+	lda		#00000001B							; 30S未响应则回到走时模式
+	sta		Sys_Status_Flag
+L_4DMode_Juge_Exit:
+	rts
+
+
+
+
+
 L_Div_A_2:
 	ldx		#0
 L_Div_A_2_Start:

@@ -96,6 +96,9 @@ L_DisDate_Day:
 	jsr		L_Dis_15Bit_DigitDot
 	pla
 	jsr		L_LSR_4Bit
+	bne		L_Day_Tens_NoZero					; 日期十位0不显示
+	lda		#$0b
+L_Day_Tens_NoZero:
 	ldx		#lcd_d2
 	jsr		L_Dis_15Bit_DigitDot
 	rts
@@ -109,7 +112,9 @@ L_DisDate_Month:
 	jsr		L_Dis_15Bit_DigitDot
 	pla
 	jsr		L_LSR_4Bit
-
+	bne		L_Month_Tens_NoZero					; 月份十位0不显示
+	lda		#$0b
+L_Month_Tens_NoZero:
 	ldx		#lcd_d0
 	jsr		L_Dis_15Bit_DigitDot
 	rts

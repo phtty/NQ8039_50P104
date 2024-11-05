@@ -37,7 +37,7 @@ L_Snooze_Blink1:
 	ldx		#lcd_COL							; 没1S亮点
 	jsr		F_DisSymbol
 	jsr		F_Display_Time
-	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则调用显示日期函数
+	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则调用显示星期函数
 	rmb1	Calendar_Flag
 	jsr		L_DisDate_Week
 	rts											; 半S触发时没1S标志不走时，直接返回
@@ -52,6 +52,40 @@ L_Snooze_Blink2:
 	jsr		L_DisDate_Week
 No_Date_Add:
 	rts
+
+
+
+
+F_DisTimeMode_Set:
+	bbs0	Clock_Flag,L_TimeMode12h
+	lda		#2
+	ldx		#lcd_d0
+	jsr		L_Dis_15Bit_DigitDot
+	lda		#4
+	ldx		#lcd_d1
+	jsr		L_Dis_15Bit_DigitDot
+	bra		L_DisTimeMode_Hr
+L_TimeMode12h:
+	lda		#1
+	ldx		#lcd_d0
+	jsr		L_Dis_15Bit_DigitDot
+	lda		#2
+	ldx		#lcd_d1
+	jsr		L_Dis_15Bit_DigitDot
+L_DisTimeMode_Hr:
+	lda		#$0c
+	ldx		#lcd_d2
+	jsr		L_Dis_15Bit_DigitDot
+	lda		#$0d
+	ldx		#lcd_d3
+	jsr		L_Dis_15Bit_DigitDot
+	bbr1	Calendar_Flag,L_DisTimeMode_NoDateAdd	; 如有增日期，则显示更新后的星期
+	rmb1	Calendar_Flag
+	jsr		L_DisDate_Week
+L_DisTimeMode_NoDateAdd:
+	rts
+
+
 
 
 F_DisHour_Set:

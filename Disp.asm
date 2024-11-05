@@ -406,6 +406,8 @@ Table_Digit_15bit:
 	.word	$79ef	; 9
 	.word	$7b6f	; 0
 	.word	$0000	; undisplay
+	.word	$5bed	; H
+	.word	$13c0	; r
 
 Table_Digit_15bit_Mask_Up:
 	.word	$0000	; frame 0

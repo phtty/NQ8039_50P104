@@ -29,6 +29,7 @@ Counter_Lcd				DS		1
 QuickAdd_Counter		DS		1
 Backlight_Counter		DS		1
 AlarmLoud_Counter		DS		1
+4DMode_Counter			DS		1
 
 Calendar_Flag			DS		1
 ;bit0 = 1 闰年
@@ -68,6 +69,7 @@ Key_Flag				DS		1
 ;bit1 = 1 首次触发
 ;bit2 = 1 按键处理
 ;bit3 = 1 背光激活
+;bit4 = 1 4D模式开启
 
 Random_Flag				DS		1
 ;bit0 = 1 滚动显示开始
