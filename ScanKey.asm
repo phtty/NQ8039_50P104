@@ -13,6 +13,7 @@ L_DelayTrigger_RunTimeMode:						; 消抖延时循环用标签
 	lda		P_Temp
 	bne		L_DelayTrigger_RunTimeMode			; 软件消抖
 
+	rmb4	IER									; 恢复PA口中断
 	smb5	PA									; 判断4D和LED键
 	rmb0	PC
 	lda		PA									; 正常走时模式下只对2个按键有响应
@@ -27,6 +28,10 @@ No_KeyLTrigger_RunTimeMode:
 No_KeyDTrigger_RunTimeMode:
 	rmb5	PA									; 判断SET键和UP键
 	smb0	PC
+	rmb4	IFR									; 开启中断前需要重新复位标志位
+	smb5	PA									; 恢复高电平以方便下一次按键
+	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	lda		PA
 	and		#$84
 	cmp		#$80
@@ -40,8 +45,10 @@ No_KeyUTrigger_RunTimeMode:
 L_KeyExit_RunTimeMode:
 	jsr			F_RandomSeed1_Get
 	jsr			F_RandomSeed3_Get
+	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyLTrigger_RunTimeMode:
@@ -50,8 +57,10 @@ L_KeyLTrigger_RunTimeMode:
 	lda		#0
 	sta		Backlight_Counter					; 每次按背光都会重置计时
 
+	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyDTrigger_RunTimeMode:
@@ -72,20 +81,19 @@ L_KeyDTrigger_RunTimeMode:
 
 	smb4	Key_Flag
 
+	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyUTrigger_RunTimeMode:
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
+
 	rts
 
 L_KeySTrigger_RunTimeMode:
 	lda		#00000100B
 	sta		Sys_Status_Flag						; 12h/24h切换
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
 	rts
 
 
@@ -193,6 +201,7 @@ L_DelayTrigger_TimeMode_Set:					; 消抖延时循环用标签
 	lda		P_Temp
 	bne		L_DelayTrigger_TimeMode_Set			; 软件消抖
 
+	rmb4	IER									; 关闭PA口中断，以免重复进中断服务函数
 	smb5	PA									; 判断4D和LED键
 	rmb0	PC
 	lda		PA									; 正常走时模式下只对2个按键有响应
@@ -207,6 +216,10 @@ No_KeyLTrigger_TimeMode_Set:
 No_KeyDTrigger_TimeMode_Set:
 	rmb5	PA									; 判断SET键和UP键
 	smb0	PC
+	rmb4	IFR									; 开启中断前需要重新复位标志位
+	smb5	PA									; 恢复高电平以方便下一次按键
+	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	lda		PA
 	and		#$84
 	cmp		#$80
@@ -220,8 +233,10 @@ No_KeyUTrigger_TimeMode_Set:
 L_KeyExit_TimeMode_Set:
 	jsr			F_RandomSeed1_Get
 	jsr			F_RandomSeed3_Get
+	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	rts
 
 
@@ -231,26 +246,32 @@ L_KeyLTrigger_TimeMode_Set:
 	smb2	PB
 	lda		#0
 	sta		Backlight_Counter					; 每次按背光都会重置计时
+	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyDTrigger_TimeMode_Set:
+	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyUTrigger_TimeMode_Set:
 	lda		Clock_Flag
 	eor		#01									; 翻转12/24h模式的状态
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
+	sta		Clock_Flag
+
 	rts
 
 L_KeySTrigger_TimeMode_Set:
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
+	lda		#00001000B
+	sta		Sys_Status_Flag
+
 	rts
+
 
 
 ; HourSet模式的按键处理

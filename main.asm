@@ -207,7 +207,6 @@ L_EndIrq:
 .include	ScanKey.asm
 .include	Time.asm
 .include	Calendar.asm
-;.include	Alarm.asm
 .include	Backlight.asm
 .include	Init.asm
 .include	Disp.asm
