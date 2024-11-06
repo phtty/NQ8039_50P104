@@ -1,32 +1,28 @@
 F_RandomSeed0_Get:
 	lda		R_Seed0
 	adc		TMR0
-	tax
-	lda		Table_RandomNum,x
+	jsr		L_Mod_A_10
 	sta		R_Seed0
 	rts
 
 F_RandomSeed1_Get:
 	lda		R_Seed1
 	sbc		TMR0
-	tax
-	lda		Table_RandomNum,x
+	jsr		L_Mod_A_10
 	sta		R_Seed1
 	rts
 
 F_RandomSeed2_Get:
 	lda		R_Seed2
 	adc		CC0
-	tax
-	lda		Table_RandomNum,x
+	jsr		L_Mod_A_10
 	sta		R_Seed2
 	rts
 
 F_RandomSeed3_Get:
 	lda		R_Seed3
 	sbc		CC0
-	tax
-	lda		Table_RandomNum,x
+	jsr		L_Mod_A_10
 	sta		R_Seed3
 	rts
 
@@ -430,6 +426,7 @@ L_4DMode_Stop:
 	rmb4	Key_Flag
 	lda		#00000001B							; 30S未响应则回到走时模式
 	sta		Sys_Status_Flag
+	jsr		F_SymbolRegulate					; 显示对应模式的常亮符号
 L_4DMode_Juge_Exit:
 	rts
 
@@ -474,261 +471,12 @@ L_Mod_A_6_Over:
 	rts
 
 
+L_Mod_A_10:
+	cmp		#10
+	bcc		L_Mod_A_10_Over
+	sec
+	sbc		#10
+	bra		L_Mod_A_10
+L_Mod_A_10_Over:
+	rts
 
-Table_RandomNum:
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6
-	.byte	$7
-	.byte	$8
-	.byte	$9
-	.byte	$0
-	.byte	$1
-	.byte	$2
-	.byte	$3
-	.byte	$4
-	.byte	$5
-	.byte	$6

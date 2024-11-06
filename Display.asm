@@ -5,8 +5,7 @@ F_Display_Time:									; 调用显示函数显示当前时间
 
 L_DisTime_Min:
 	lda		R_Time_Min
-	tax
-	lda		Table_DataDot,x
+	jsr		L_A_DecToHex
 	pha
 	and		#$0f
 	ldx		#lcd_d3
@@ -45,8 +44,7 @@ L_24hMode_Time:
 	jsr		F_ClrSymbol
 	lda		R_Time_Hour
 L_Start_DisTime_Hour:
-	tax
-	lda		Table_DataDot,x
+	jsr		L_A_DecToHex
 	pha
 	and		#$0f
 	ldx		#lcd_d1
@@ -88,8 +86,8 @@ F_Display_Date:
 	rts
 
 L_DisDate_Day:
-	ldx		R_Date_Day
-	lda		Table_DataDot,x
+	lda		R_Date_Day
+	jsr		L_A_DecToHex
 	pha
 	and		#$0f
 	ldx		#lcd_d3
@@ -104,8 +102,8 @@ L_Day_Tens_NoZero:
 	rts
 
 L_DisDate_Month:
-	ldx		R_Date_Month
-	lda		Table_DataDot,x
+	lda		R_Date_Month
+	jsr		L_A_DecToHex
 	pha
 	and		#$0f
 	ldx		#lcd_d1
@@ -120,17 +118,17 @@ L_Month_Tens_NoZero:
 	rts
 
 L_DisDate_Year:
-	ldx		#00									; 20xx年的开头20是固定的
-	lda		Table_DataDot,x						; 所以20固定会显示
+	lda		#00									; 20xx年的开头20是固定的
+	jsr		L_A_DecToHex							; 所以20固定会显示
 	ldx		#lcd_d1
 	jsr		L_Dis_15Bit_DigitDot
-	ldx		#02
-	lda		Table_DataDot,x
+	lda		#02
+	jsr		L_A_DecToHex
 	ldx		#lcd_d0
 	jsr		L_Dis_15Bit_DigitDot
 
-	ldx		R_Date_Year							; 显示当前的年份
-	lda		Table_DataDot,x
+	lda		R_Date_Year							; 显示当前的年份
+	jsr		L_A_DecToHex
 	pha
 	and		#$0f
 	ldx		#lcd_d3
@@ -178,7 +176,16 @@ F_UnDisplay_Day:								; 闪烁时取消显示用的函数
 
 
 
-L_DisDate_Week:
+F_DisDate_Week:
+	jsr		L_GetWeek
+	ldx		#lcd_week
+	jsr		L_Dis_7Bit_WeekDot
+	rts
+
+F_Display_Week:
+	bbr1	Sys_Status_Flag,No_4DMode_Week
+	rts
+No_4DMode_Week:
 	jsr		L_GetWeek
 	ldx		#lcd_week
 	jsr		L_Dis_7Bit_WeekDot
@@ -194,7 +201,87 @@ F_UnDisplay_InDateMode:
 
 
 F_SymbolRegulate:
+	bbs0	Sys_Status_Flag,RTMode_Symbol
+	bbs1	Sys_Status_Flag,4DMode_Symbol
+	bbs2	Sys_Status_Flag,TMMode_Symbol
+	bbs3	Sys_Status_Flag,TSMode_Symbol
+	bbs4	Sys_Status_Flag,TSMode_Symbol
+	bbs5	Sys_Status_Flag,YSMode_Symbol
+	bbs6	Sys_Status_Flag,MSMode_Symbol
+	bbs7	Sys_Status_Flag,DSMode_Symbol
+	rts
 
+RTMode_Symbol:
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	ldx		#lcd_DM
+	jsr		F_ClrSymbol
+	ldx		#lcd_Y
+	jsr		F_ClrSymbol
+	rts
+
+4DMode_Symbol:
+	ldx		#lcd_D
+	jsr		F_DisSymbol
+	ldx		#lcd_COL
+	jsr		F_ClrSymbol
+	ldx		#lcd_DM
+	jsr		F_ClrSymbol
+	ldx		#lcd_Y
+	jsr		F_ClrSymbol
+	rts
+
+TMMode_Symbol:
+	ldx		#lcd_COL
+	jsr		F_ClrSymbol
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	ldx		#lcd_DM
+	jsr		F_ClrSymbol
+	ldx		#lcd_Y
+	jsr		F_ClrSymbol
+	rts
+
+TSMode_Symbol:
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	ldx		#lcd_DM
+	jsr		F_ClrSymbol
+	ldx		#lcd_Y
+	jsr		F_ClrSymbol
+	rts
+
+YSMode_Symbol:
+	ldx		#lcd_Y
+	jsr		F_DisSymbol
+	ldx		#lcd_COL
+	jsr		F_ClrSymbol
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	ldx		#lcd_DM
+	jsr		F_ClrSymbol
+	rts
+
+MSMode_Symbol:
+	ldx		#lcd_DM
+	jsr		F_DisSymbol
+	ldx		#lcd_COL
+	jsr		F_ClrSymbol
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	ldx		#lcd_Y
+	jsr		F_ClrSymbol
+	rts
+
+DSMode_Symbol:
+	ldx		#lcd_DM
+	jsr		F_DisSymbol
+	ldx		#lcd_COL
+	jsr		F_ClrSymbol
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	ldx		#lcd_Y
+	jsr		F_ClrSymbol
 	rts
 
 
@@ -204,126 +291,43 @@ L_LSR_4Bit:
 	ror
 	ror
 	ror
-	and		#$0F
+	and		#$0f
 	rts
 
 
 ;================================================
-;********************************************	
-Table_DataDot:		; 对应显示的16进制
-	.byte 	00h	;0
-	.byte 	01h	;1
-	.byte	02h	;2
-	.byte	03h	;3
-	.byte	04h	;4
-	.byte	05h	;5
-	.byte	06h	;6
-	.byte	07h	;7
-	.byte	08h	;8
-	.byte	09h	;9
-	.byte	10h	;10
-	.byte 	11h	;11
-	.byte	12h	;12
-	.byte	13h	;13
-	.byte	14h	;14
-	.byte	15h	;15
-	.byte 	16h	;16
-	.byte 	17h	;17
-	.byte	18h	;18
-	.byte	19h	;19
-	.byte	20h	;20
-	.byte	21h	;21
-	.byte	22h	;22
-	.byte	23h	;23
-	.byte	24h	;24
-	.byte	25h	;25
-	.byte	26h	;26
-	.byte 	27h	;27
-	.byte	28h	;28
-	.byte	29h	;29
-	.byte	30h	;30
-	.byte	31h	;31
-	.byte 	32h	;32
-	.byte 	33h	;33
-	.byte	34h	;34
-	.byte	35h	;35
-	.byte	36h	;36
-	.byte	37h	;37
-	.byte	38h	;38
-	.byte	39h	;39
-	.byte	40h	;40
-	.byte	41h	;41
-	.byte	42h	;42
-	.byte 	43h	;43
-	.byte	44h	;44
-	.byte	45h	;45
-	.byte	46h	;46
-	.byte	47h	;47
-	.byte 	48h	;48
-	.byte 	49h	;49
-	.byte	50h	;50
-	.byte	51h	;51
-	.byte	52h	;52
-	.byte	53h	;53
-	.byte	54h	;54
-	.byte	55h	;55
-	.byte	56h	;56
-	.byte	57h	;57
-	.byte	58h	;58
-	.byte 	59h	;59
-	.byte 	60h	;60
-	.byte	61h	;61
-	.byte	62h	;62
-	.byte	63h	;63
-	.byte	64h	;64
-	.byte	65h	;65
-	.byte	66h	;66
-	.byte	67h	;67
-	.byte	68h	;68
-	.byte 	69h	;69
-	.byte 	70h	;70
-	.byte	71h	;71
-	.byte	72h	;72
-	.byte	73h	;73
-	.byte	74h	;74
-	.byte	75h	;75
-	.byte	76h	;76
-	.byte 	77h	;77
-	.byte	78h	;78
-	.byte	79h	;79
-	.byte	80h	;30
-	.byte	81h	;81
-	.byte 	82h	;82
-	.byte 	83h	;83
-	.byte	84h	;84
-	.byte	85h	;85
-	.byte	86h	;86
-	.byte	87h	;87
-	.byte	88h	;88
-	.byte	89h	;89
-	.byte	90h	;90
-	.byte	91h	;91
-	.byte	92h	;92
-	.byte 	93h	;93
-	.byte	94h	;94
-	.byte	95h	;95
-	.byte	96h	;96
-	.byte	97h	;97
-	.byte 	98h	;98
-	.byte 	99h	;99
+;十进制转十六进制
+L_A_DecToHex:
+	sta		P_Temp								; 将十进制输入保存到 P_Temp
+	lda		#0									; 初始化高位寄存器
+	sta		P_Temp+1							; 高位清零
+	sta		P_Temp+2							; 低位清零
 
-; 12h模式专用Table
-Table12h_DataDot:
-	.byte	12h	;12
-	.byte 	01h	;1
-	.byte	02h	;2
-	.byte	03h	;3
-	.byte	04h	;4
-	.byte	05h	;5
-	.byte	06h	;6
-	.byte	07h	;7
-	.byte	08h	;8
-	.byte	09h	;9
-	.byte	10h	;10
-	.byte 	11h	;11
-	.byte	12h	;12
+L_DecToHex_Loop:
+	lda		P_Temp								; 读取当前十进制值
+	cmp		#10
+	bcc		L_DecToHex_End						; 如果小于16，则跳到结束
+
+	sec											; 启用借位
+	sbc		#10									; 减去16
+	sta		P_Temp								; 更新十进制值
+	inc		P_Temp+1							; 高位+1，累加十六进制的十位
+
+	bra		L_DecToHex_Loop						; 重复循环
+
+L_DecToHex_End:
+	lda		P_Temp								; 最后剩余的值是低位
+	sta		P_Temp+2							; 存入低位
+
+	lda		P_Temp+1							; 将高位放入A寄存器准备结果组合
+	clc
+	rol
+	rol
+	rol
+	rol											; 左移4次，完成乘16
+	clc
+	adc		P_Temp+2							; 加上低位值
+
+	rts
+
+

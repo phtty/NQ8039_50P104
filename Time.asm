@@ -39,7 +39,7 @@ L_Snooze_Blink1:
 	jsr		F_Display_Time
 	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则调用显示星期函数
 	rmb1	Calendar_Flag
-	jsr		L_DisDate_Week
+	jsr		F_DisDate_Week
 	rts											; 半S触发时没1S标志不走时，直接返回
 L_Dot_Clear:
 	rmb1	Timer_Flag							; 清1S标志
@@ -49,7 +49,7 @@ L_Snooze_Blink2:
 	jsr		F_Display_Time
 	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则显示更新后的星期
 	rmb1	Calendar_Flag
-	jsr		L_DisDate_Week
+	jsr		F_DisDate_Week
 No_Date_Add:
 	rts
 
@@ -81,7 +81,7 @@ L_DisTimeMode_Hr:
 	jsr		L_Dis_15Bit_DigitDot
 	bbr1	Calendar_Flag,L_DisTimeMode_NoDateAdd	; 如有增日期，则显示更新后的星期
 	rmb1	Calendar_Flag
-	jsr		L_DisDate_Week
+	jsr		F_DisDate_Week
 L_DisTimeMode_NoDateAdd:
 	rts
 
@@ -96,7 +96,7 @@ L_Blink_Hour:
 	rmb0	Timer_Flag							; 清半S标志
 	bbr1	Calendar_Flag,L_No_Date_Add_HS
 	rmb1	Calendar_Flag
-	jsr		L_DisDate_Week
+	jsr		F_DisDate_Week
 L_No_Date_Add_HS:
 	bbs1	Timer_Flag,L_Hour_Clear
 L_KeyTrigger_NoBlink_Hour:
@@ -120,7 +120,7 @@ L_Blink_Min:
 	rmb0	Timer_Flag							; 清半S标志
 	bbr1	Calendar_Flag,L_No_Date_Add_MS
 	rmb1	Calendar_Flag
-	jsr		L_DisDate_Week
+	jsr		F_DisDate_Week
 L_No_Date_Add_MS:
 	bbs1	Timer_Flag,L_Min_Clear
 L_KeyTrigger_NoBlink_Min:

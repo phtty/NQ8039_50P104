@@ -57,12 +57,14 @@ L_Clear_Ram_Loop:
 
 	cli												; 开总中断
 
-
+	jsr		F_Display_Time
+	jsr		F_DisDate_Week
 
 
 ; 状态机
 MainLoop:
 	jsr		F_Time_Run							; 走时全局生效
+	jsr		F_Display_Week						; 星期显示只有4D模式不生效
 	jsr		F_Backlight							; 背光全局生效
 	jsr		F_SymbolRegulate
 
@@ -77,43 +79,44 @@ Status_Juge:
 	bbs7	Sys_Status_Flag,Status_Day_Set
 	bra		MainLoop
 Status_Runtime:
-	jsr		F_KeyTrigger_RunTimeMode				; RunTime模式下按键逻辑
+	jsr		F_KeyTrigger_Short						; RunTime模式下只有短按
 	jsr		F_DisTime_Run
-	jsr		L_DisDate_Week
 	sta		HALT
 	bra		MainLoop
 Status_4D_Mode:
-	jsr		F_KeyTrigger_4DMode						; 4D模式下按键逻辑
+	jsr		F_KeyTrigger_Short						; 4D模式下只有短按
 	jsr		F_Display_Random_Rolling
 	jsr		F_4DMode_Juge							; 判断是否应当退出4D模式
 	sta		HALT
 	bra		MainLoop
 Status_TimeMode_Set:
-	jsr		F_KeyTrigger_TimeMode_Set				; 12/24h切换下的按键逻辑
+	jsr		F_KeyTrigger_Short						; 12/24h切换下只有短按
 	jsr		F_DisTimeMode_Set
-	jsr		L_DisDate_Week
 	sta		HALT
 	bra		MainLoop
 Status_Hour_Set:
-	jsr		F_KeyTrigger_Hour_Set					; 12/24h切换下的按键逻辑
+	jsr		F_KeyTrigger_Long						; 小时设置模式下有长按
 	jsr		F_DisHour_Set
-	jsr		L_DisDate_Week
 	sta		HALT
 	bra		MainLoop
 Status_Min_Set:
-
+	jsr		F_KeyTrigger_Long						; 分钟设置模式下有长按
+	jsr		F_DisMin_Set
 	sta		HALT
 	bra		MainLoop
 Status_Year_Set:
-
+	jsr		F_KeyTrigger_Long						; 年份设置模式下有长按
+	jsr		F_DisYear_Set
 	sta		HALT
 	bra		MainLoop
 Status_Month_Set:
-
+	jsr		F_KeyTrigger_Long						; 月份设置模式下有长按
+	jsr		F_DisMonth_Set
 	sta		HALT
 	bra		MainLoop
 Status_Day_Set:
-
+	jsr		F_KeyTrigger_Long						; 日期设置模式下有长按
+	jsr		F_DisDay_Set
 	sta		HALT
 	bra		MainLoop
 

@@ -119,11 +119,11 @@ L_Year_Clear:
 F_DisMonth_Set:
 	lda		Key_Flag
 	bbs0	Key_Flag,L_KeyTrigger_NoBlink_Month	; 有按键时不闪烁
-	bbs0	Timer_Flag,L_Blink_Month				; 没有半S标志不闪烁
+	bbs0	Timer_Flag,L_Blink_Month			; 没有半S标志不闪烁
 	rts
 L_Blink_Month:
 	rmb0	Timer_Flag							; 清半S标志
-	bbs1	Timer_Flag,L_Month_Clear				; 有1S标志时灭
+	bbs1	Timer_Flag,L_Month_Clear			; 有1S标志时灭
 L_KeyTrigger_NoBlink_Month:
 	jsr		L_DisDate_Month
 	rts	
@@ -234,30 +234,30 @@ L_Table_WeekInYear:
 
 ; 平年里每月份首日对当前年份首日的星期偏移
 L_Table_Gap_CommonMonth:
-	.byte	0	; 1月1日
-	.byte	3	; 2月1日
-	.byte	3	; 3月1日
-	.byte	6	; 4月1日
-	.byte	1	; 5月1日
-	.byte	4	; 6月1日
-	.byte	6	; 7月1日
-	.byte	2	; 8月1日
-	.byte	5	; 9月1日
-	.byte	0	; 10月1日
-	.byte	3	; 11月1日
-	.byte	5	; 12月1日
+	.byte	$0	; 1月1日
+	.byte	$3	; 2月1日
+	.byte	$3	; 3月1日
+	.byte	$6	; 4月1日
+	.byte	$1	; 5月1日
+	.byte	$4	; 6月1日
+	.byte	$6	; 7月1日
+	.byte	$2	; 8月1日
+	.byte	$5	; 9月1日
+	.byte	$0	; 10月1日
+	.byte	$3	; 11月1日
+	.byte	$5	; 12月1日
 
 ; 闰年里每月份首日对当前年份首日的星期偏移
 L_Table_Gap_LeapMonth:
-	.byte	0	; 1月1日
-	.byte	3	; 2月1日
-	.byte	4	; 3月1日
-	.byte	0	; 4月1日
-	.byte	2	; 5月1日
-	.byte	5	; 6月1日
-	.byte	0	; 7月1日
-	.byte	3	; 8月1日
-	.byte	6	; 9月1日
-	.byte	1	; 10月1日
-	.byte	4	; 11月1日
-	.byte	6	; 12月1日
+	.byte	$0	; 1月1日
+	.byte	$3	; 2月1日
+	.byte	$4	; 3月1日
+	.byte	$0	; 4月1日
+	.byte	$2	; 5月1日
+	.byte	$5	; 6月1日
+	.byte	$0	; 7月1日
+	.byte	$3	; 8月1日
+	.byte	$6	; 9月1日
+	.byte	$1	; 10月1日
+	.byte	$4	; 11月1日
+	.byte	$6	; 12月1日
