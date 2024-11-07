@@ -62,7 +62,7 @@ L_No_Phase6:
 	sta		Frame_Counter
 	sta		Frame_Serial
 	sta		Anim_Phase
-	rmb0	Random_Flag
+	rmb0	Random_Flag							; 滚动显示停止
 	rmb2	Random_Flag							; 重新开始采样随机数
 
 L_No_Rolling:
@@ -405,31 +405,6 @@ L_Dis_Start_D3:
 	jsr		F_Dis_Animation_Frame
 L_Display_D3_InPhase_Exit:
 	rts
-
-
-
-
-
-F_4DMode_Juge:
-	bbr4	Key_Flag,L_4DMode_Juge_Exit
-	bbr7	Timer_Flag,L_4DMode_Juge_Exit
-
-	rmb7	Timer_Flag
-	lda		4DMode_Counter
-	cmp		#31
-	bcs		L_4DMode_Stop
-	inc		4DMode_Counter
-	bra		L_4DMode_Juge_Exit
-L_4DMode_Stop:
-	lda		#0
-	sta		4DMode_Counter
-	rmb4	Key_Flag
-	lda		#00000001B							; 30S未响应则回到走时模式
-	sta		Sys_Status_Flag
-	jsr		F_SymbolRegulate					; 显示对应模式的常亮符号
-L_4DMode_Juge_Exit:
-	rts
-
 
 
 

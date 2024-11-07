@@ -55,7 +55,6 @@ L_KeyLTrigger_Short:							; 背光功能全状态都一样
 	smb2	PB
 	lda		#0
 	sta		Backlight_Counter					; 每次按背光都会重置计时
-	sta		4DMode_Counter						; 同时也重置4D模式计时
 	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
@@ -63,6 +62,9 @@ L_KeyLTrigger_Short:							; 背光功能全状态都一样
 	rts
 
 L_KeyDTrigger_Short:
+	lda		#0
+	sta		Return_Counter						; 重置返回走时模式计时
+
 	lda		Sys_Status_Flag						; 4D模式的4D键会触发随机数滚动
 	cmp		#00000010B
 	bne		No_Status4D_KeyD
@@ -72,6 +74,9 @@ No_Status4D_KeyD:
 	rts
 
 L_KeyUTrigger_Short:
+	lda		#0
+	sta		Return_Counter						; 重置返回走时模式计时
+
 	lda		Sys_Status_Flag
 	cmp		#00000001B
 	bne		No_StatusRT_KeyU
@@ -88,6 +93,9 @@ No_StatusTM_KeyU:
 	rts
 
 L_KeySTrigger_Short:
+	lda		#0
+	sta		Return_Counter						; 重置返回走时模式计时
+
 	lda		Sys_Status_Flag
 	cmp		#00000001B
 	bne		No_StatusRT_KeyS
@@ -198,16 +206,24 @@ L_KeyLTrigger_Long:								; 背光键全状态功能都一样
 	lda		#0
 	sta		Backlight_Counter					; 每次按背光都会重置计时
 	rmb4	IFR									; 开启中断前需要重新复位标志位
+	rmb0	Key_Flag
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
 	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyDTrigger_Long:
+	lda		#0
+	sta		Return_Counter						; 重置返回走时模式计时
+	rmb0	Key_Flag
 	jmp		L_KeyDTrigger_No4DMode
 	rts
 
 L_KeyUTrigger_Long:
+	lda		#0
+	sta		Return_Counter						; 重置走时模式计时
+	rmb0	Key_Flag
+
 	lda		Sys_Status_Flag
 	cmp		#00001000B
 	bne		No_StatusHS_KeyU
@@ -233,6 +249,9 @@ No_StatusDS_KeyU:
 
 L_KeySTrigger_Long:
 	jsr		F_SymbolRegulate					; 显示对应模式的常亮符号
+	lda		#0
+	sta		Return_Counter						; 重置4D模式计时
+	rmb0	Key_Flag
 
 	lda		Sys_Status_Flag
 	cmp		#00001000B
@@ -265,6 +284,7 @@ No_StatusDS_KeyS:
 L_KeyDTrigger_No4DMode:
 	lda		#0010B
 	sta		Sys_Status_Flag
+
 	lda		#0
 	ldx		#lcd_d0
 	jsr		L_Dis_15Bit_DigitDot
@@ -278,15 +298,15 @@ L_KeyDTrigger_No4DMode:
 	ldx		#lcd_d3
 	jsr		L_Dis_15Bit_DigitDot
 
-	smb4	Key_Flag							; 开启4D模式
-	lda		#0
-	sta		4DMode_Counter						; 重置4D模式计时
+	lda		Random_Flag
 
 	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
 	smb0	PC
 	smb4	IER									; 恢复PA口中断
-	rts
+	pla
+	pla
+	jmp		MainLoop
 
 
 
@@ -301,6 +321,7 @@ L_KeySTrigger_RunTimeMode:
 	lda		#00000100B
 	sta		Sys_Status_Flag						; 12h/24h切换
 	jsr		F_SymbolRegulate					; 显示对应模式的常亮符号
+	smb4	Key_Flag							; 非走时状态
 	pla
 	pla
 	jmp		MainLoop
@@ -314,8 +335,6 @@ L_KeyDTrigger_4DMode:
 	smb2	Random_Flag							; 停止采样随机数
 	jsr		F_RandomSeed0_Get
 	jsr		F_RandomSeed2_Get
-	lda		#0
-	sta		4DMode_Counter						; 重置4D模式计时
 
 	rmb4	IFR									; 开启中断前需要重新复位标志位
 	smb5	PA									; 恢复高电平以方便下一次按键
@@ -325,13 +344,14 @@ L_KeyDTrigger_4DMode:
 
 ; 4D模式的U键处理
 L_KeyUTrigger_4DMode:
-	jsr		L_4DMode_Stop						; 4D模式下U键可以回到时间模式
+	lda		#0
+	sta		Return_Counter
+	rmb4	Key_Flag
+	jsr		L_Return_Stop						; 4D模式下U键可以回到时间模式
 	rts
 
 ; 4D模式的S键处理
 L_KeySTrigger_4DMode:
-	lda		#0
-	sta		4DMode_Counter
 	pla
 	pla
 	jmp		MainLoop
@@ -395,6 +415,8 @@ L_KeySTrigger_HourSet:
 
 ; 分钟设置模式的U键处理
 L_KeyUTrigger_MinSet:
+	lda		#0
+	sta		R_Time_Sec							; 设置分会重置秒
 	inc		R_Time_Min
 	lda		#59
 	cmp		R_Time_Min
@@ -549,8 +571,10 @@ L_KeySTrigger_DaySet:
 	rmb1	TMRC								; 关闭快加8Hz计时的定时器
 	rmb0	Key_Flag							; 清相关标志位
 	rmb3	Timer_Flag
+	rmb4	Key_Flag							; 回到走时模式，关闭30s计数
 	lda		#0									; 清理相关变量
 	sta		QuickAdd_Counter
+	sta		Return_Counter
 
 	lda		#00000001B
 	sta		Sys_Status_Flag

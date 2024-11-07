@@ -216,8 +216,6 @@ RTMode_Symbol:
 	jsr		F_ClrSymbol
 	ldx		#lcd_DM
 	jsr		F_ClrSymbol
-	ldx		#lcd_Y
-	jsr		F_ClrSymbol
 	rts
 
 4DMode_Symbol:
@@ -229,6 +227,8 @@ RTMode_Symbol:
 	jsr		F_ClrSymbol
 	ldx		#lcd_Y
 	jsr		F_ClrSymbol
+	ldx		#lcd_PM
+	jsr		F_ClrSymbol
 	rts
 
 TMMode_Symbol:
@@ -236,19 +236,12 @@ TMMode_Symbol:
 	jsr		F_ClrSymbol
 	ldx		#lcd_D
 	jsr		F_ClrSymbol
-	ldx		#lcd_DM
-	jsr		F_ClrSymbol
-	ldx		#lcd_Y
+	ldx		#lcd_PM
 	jsr		F_ClrSymbol
 	rts
 
 TSMode_Symbol:
-	ldx		#lcd_D
-	jsr		F_ClrSymbol
-	ldx		#lcd_DM
-	jsr		F_ClrSymbol
-	ldx		#lcd_Y
-	jsr		F_ClrSymbol
+
 	rts
 
 YSMode_Symbol:
@@ -256,17 +249,13 @@ YSMode_Symbol:
 	jsr		F_DisSymbol
 	ldx		#lcd_COL
 	jsr		F_ClrSymbol
-	ldx		#lcd_D
-	jsr		F_ClrSymbol
-	ldx		#lcd_DM
+	ldx		#lcd_PM
 	jsr		F_ClrSymbol
 	rts
 
 MSMode_Symbol:
 	ldx		#lcd_DM
 	jsr		F_DisSymbol
-	ldx		#lcd_COL
-	jsr		F_ClrSymbol
 	ldx		#lcd_D
 	jsr		F_ClrSymbol
 	ldx		#lcd_Y
@@ -276,11 +265,7 @@ MSMode_Symbol:
 DSMode_Symbol:
 	ldx		#lcd_DM
 	jsr		F_DisSymbol
-	ldx		#lcd_COL
-	jsr		F_ClrSymbol
 	ldx		#lcd_D
-	jsr		F_ClrSymbol
-	ldx		#lcd_Y
 	jsr		F_ClrSymbol
 	rts
 

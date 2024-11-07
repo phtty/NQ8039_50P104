@@ -33,7 +33,6 @@ F_DisTime_Run:
 L_TimeDot_Out:
 	rmb0	Timer_Flag
 	bbs1	Timer_Flag,L_Dot_Clear
-L_Snooze_Blink1:
 	ldx		#lcd_COL							; 没1S亮点
 	jsr		F_DisSymbol
 	jsr		F_Display_Time
@@ -45,7 +44,6 @@ L_Dot_Clear:
 	rmb1	Timer_Flag							; 清1S标志
 	ldx		#lcd_COL							; 1S触发后必定进灭点，同时走时
 	jsr		F_ClrSymbol
-L_Snooze_Blink2:
 	jsr		F_Display_Time
 	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则显示更新后的星期
 	rmb1	Calendar_Flag
@@ -56,8 +54,14 @@ No_Date_Add:
 
 
 
+
 F_DisTimeMode_Set:
-	bbs0	Clock_Flag,L_TimeMode12h
+	bbs0	Timer_Flag,L_TimeMode_BlinkStart
+	rts
+L_TimeMode_BlinkStart:
+	rmb0	Timer_Flag
+	bbs1	Timer_Flag,L_TimeMode_BlinkClear
+	bbs0	Clock_Flag,L_TimeMode12h			; 判断12h还是24h模式
 	lda		#2
 	ldx		#lcd_d0
 	jsr		L_Dis_15Bit_DigitDot
@@ -79,11 +83,30 @@ L_DisTimeMode_Hr:
 	lda		#$0d
 	ldx		#lcd_d3
 	jsr		L_Dis_15Bit_DigitDot
-	bbr1	Calendar_Flag,L_DisTimeMode_NoDateAdd	; 如有增日期，则显示更新后的星期
+	bbr1	Calendar_Flag,No_Date_Add			; 如有增日期，则调用显示星期函数
 	rmb1	Calendar_Flag
 	jsr		F_DisDate_Week
-L_DisTimeMode_NoDateAdd:
+	rts											; 半S触发时没1S标志不走时，直接返回
+L_TimeMode_BlinkClear:
+	rmb1	Timer_Flag							; 清1S标志
+	lda		#11
+	ldx		#lcd_d0
+	jsr		L_Dis_15Bit_DigitDot
+	lda		#11
+	ldx		#lcd_d1
+	jsr		L_Dis_15Bit_DigitDot
+	lda		#11
+	ldx		#lcd_d2
+	jsr		L_Dis_15Bit_DigitDot
+	lda		#11
+	ldx		#lcd_d3
+	jsr		L_Dis_15Bit_DigitDot
+	bbr1	Calendar_Flag,L_TimeMode_NoDateAdd	; 如有增日期，则显示更新后的星期
+	rmb1	Calendar_Flag
+	jsr		F_DisDate_Week
+L_TimeMode_NoDateAdd:
 	rts
+
 
 
 

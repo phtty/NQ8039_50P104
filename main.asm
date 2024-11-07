@@ -86,39 +86,69 @@ Status_Runtime:
 Status_4D_Mode:
 	jsr		F_KeyTrigger_Short						; 4D模式下只有短按
 	jsr		F_Display_Random_Rolling
-	jsr		F_4DMode_Juge							; 判断是否应当退出4D模式
+	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
 	bra		MainLoop
 Status_TimeMode_Set:
 	jsr		F_KeyTrigger_Short						; 12/24h切换下只有短按
 	jsr		F_DisTimeMode_Set
+	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
 	bra		MainLoop
 Status_Hour_Set:
 	jsr		F_KeyTrigger_Long						; 小时设置模式下有长按
 	jsr		F_DisHour_Set
+	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
 	bra		MainLoop
 Status_Min_Set:
 	jsr		F_KeyTrigger_Long						; 分钟设置模式下有长按
 	jsr		F_DisMin_Set
+	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
 	bra		MainLoop
 Status_Year_Set:
 	jsr		F_KeyTrigger_Long						; 年份设置模式下有长按
 	jsr		F_DisYear_Set
+	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
 	bra		MainLoop
 Status_Month_Set:
 	jsr		F_KeyTrigger_Long						; 月份设置模式下有长按
 	jsr		F_DisMonth_Set
+	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
 	bra		MainLoop
 Status_Day_Set:
 	jsr		F_KeyTrigger_Long						; 日期设置模式下有长按
 	jsr		F_DisDay_Set
+	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
-	bra		MainLoop
+	jmp		MainLoop
+
+
+
+
+F_ReturnToRunTime_Juge:
+	bbr4	Key_Flag,L_Return_Juge_Exit
+	bbr7	Timer_Flag,L_Return_Juge_Exit
+
+	rmb7	Timer_Flag
+	lda		Return_Counter
+	cmp		#31
+	bcs		L_Return_Stop
+	inc		Return_Counter
+	bra		L_Return_Juge_Exit
+L_Return_Stop:
+	lda		#0
+	sta		Return_Counter
+	rmb4	Key_Flag
+	lda		#00000001B							; 30S未响应则回到走时模式
+	sta		Sys_Status_Flag
+	jsr		F_SymbolRegulate					; 显示对应模式的常亮符号
+L_Return_Juge_Exit:
+	rts
+
 
 
 
