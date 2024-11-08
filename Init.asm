@@ -29,14 +29,9 @@ F_Init_SystemRam:							; 系统初始化
 	lda		#00
 	sta		R_Time_Sec
 
-	lda		#06
-	sta		R_Alarm_Hour
-	lda		#00
-	sta		R_Alarm_Min
-
 	lda		#05
 	sta		R_Date_Day
-	lda		#7
+	lda		#07
 	sta		R_Date_Month
 	lda		#24
 	sta		R_Date_Year

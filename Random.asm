@@ -157,7 +157,7 @@ Is_Seed0_BorrowOff:								; 判断seed0是否退位
 	cmp		#05
 	bne		L_Dis_Start_D0
 	lda		R_Seed0
-	cmp		#00	
+	cmp		#00
 	bne		L_Seed0_NoBorrowOff					; 判断seed0是否溢出
 	lda		#09
 	sta		R_Seed0
@@ -454,4 +454,3 @@ L_Mod_A_10:
 	bra		L_Mod_A_10
 L_Mod_A_10_Over:
 	rts
-

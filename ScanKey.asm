@@ -17,11 +17,15 @@ L_DelayTrigger_Short:							; 消抖延时循环用标签
 	smb5	PA									; 判断4D和LED键
 	rmb0	PC
 	lda		PA									; 正常走时模式下只对2个按键有响应
-	and		#$84
+	and		#$8c
 	cmp		#$80
 	bne		No_KeyLTrigger_Short				; 由于跳转指令寻址能力的问题，这里采用jmp进行跳转
 	jmp		L_KeyLTrigger_Short					; LED键触发
 No_KeyLTrigger_Short:
+	cmp		#$08
+	bne		No_KeyKTrigger_Short
+	jmp		L_KeyKTrigger_Short					; K键触发
+No_KeyKTrigger_Short:
 	cmp		#$04
 	bne		No_KeyDTrigger_Short
 	jmp		L_KeyDTrigger_Short					; 4D键触发
@@ -33,7 +37,7 @@ No_KeyDTrigger_Short:
 	smb0	PC
 	smb4	IER									; 恢复PA口中断
 	lda		PA
-	and		#$84
+	and		#$8c
 	cmp		#$80
 	bne		No_KeyUTrigger_Short
 	jmp		L_KeyUTrigger_Short					; Up键触发
@@ -65,12 +69,27 @@ L_KeyDTrigger_Short:
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
 
-	lda		Sys_Status_Flag						; 4D模式的4D键会触发随机数滚动
+	lda		Sys_Status_Flag
 	cmp		#00000010B
 	bne		No_Status4D_KeyD
-	jmp		L_KeyDTrigger_4DMode
+	jmp		L_KeyDTrigger_4DMode				; 4D模式的4D键会触发随机数滚动
 No_Status4D_KeyD:
 	jmp		L_KeyDTrigger_No4DMode				; 非4D模式的4D键会进入4D模式
+	rts
+
+L_KeyKTrigger_Short:
+	lda		#0
+	sta		Return_Counter						; 重置返回走时模式计时
+
+	lda		Sys_Status_Flag
+	cmp		#00000010B
+	bne		No_Status4D_KeyK
+	jmp		L_KeyKTrigger_4DMode				; 4D模式的4D键会触发随机数滚动
+No_Status4D_KeyK:
+	rmb4	IFR									; 开启中断前需要重新复位标志位
+	smb5	PA									; 恢复高电平以方便下一次按键
+	smb0	PC
+	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyUTrigger_Short:
@@ -329,7 +348,8 @@ L_KeySTrigger_RunTimeMode:
 
 
 
-; 4D模式的D键处理
+; 4D模式的D、K键处理
+L_KeyKTrigger_4DMode:
 L_KeyDTrigger_4DMode:
 	smb0	Random_Flag							; 开始滚动动画
 	smb2	Random_Flag							; 停止采样随机数

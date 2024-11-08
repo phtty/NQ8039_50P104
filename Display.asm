@@ -90,14 +90,14 @@ L_DisDate_Day:
 	jsr		L_A_DecToHex
 	pha
 	and		#$0f
-	ldx		#lcd_d3
+	ldx		#lcd_d1
 	jsr		L_Dis_15Bit_DigitDot
 	pla
 	jsr		L_LSR_4Bit
 	bne		L_Day_Tens_NoZero					; 日期十位0不显示
 	lda		#$0b
 L_Day_Tens_NoZero:
-	ldx		#lcd_d2
+	ldx		#lcd_d0
 	jsr		L_Dis_15Bit_DigitDot
 	rts
 
@@ -106,14 +106,14 @@ L_DisDate_Month:
 	jsr		L_A_DecToHex
 	pha
 	and		#$0f
-	ldx		#lcd_d1
+	ldx		#lcd_d3
 	jsr		L_Dis_15Bit_DigitDot
 	pla
 	jsr		L_LSR_4Bit
 	bne		L_Month_Tens_NoZero					; 月份十位0不显示
 	lda		#$0b
 L_Month_Tens_NoZero:
-	ldx		#lcd_d0
+	ldx		#lcd_d2
 	jsr		L_Dis_15Bit_DigitDot
 	rts
 
@@ -158,19 +158,19 @@ F_UnDisplay_Year:								; 闪烁时取消显示用的函数
 
 F_UnDisplay_Month:								; 闪烁时取消显示用的函数
 	lda		#11
-	ldx		#lcd_d0
+	ldx		#lcd_d2
 	jsr		L_Dis_15Bit_DigitDot
 	lda		#11
-	ldx		#lcd_d1
+	ldx		#lcd_d3
 	jsr		L_Dis_15Bit_DigitDot
 	rts
 
 F_UnDisplay_Day:								; 闪烁时取消显示用的函数
 	lda		#11
-	ldx		#lcd_d2
+	ldx		#lcd_d0
 	jsr		L_Dis_15Bit_DigitDot
 	lda		#11
-	ldx		#lcd_d3
+	ldx		#lcd_d1
 	jsr		L_Dis_15Bit_DigitDot
 	rts
 
@@ -256,6 +256,7 @@ YSMode_Symbol:
 	ldx		#lcd_PM
 	jsr		F_ClrSymbol
 
+	jsr		L_4D_Day_Judge						; 判断是否为4D日
 	bbs3	Random_Flag,L_4D_Day_YS
 	ldx		#lcd_D
 	jsr		F_ClrSymbol
@@ -272,6 +273,7 @@ MSMode_Symbol:
 	ldx		#lcd_Y
 	jsr		F_ClrSymbol
 
+	jsr		L_4D_Day_Judge						; 判断是否为4D日
 	bbs3	Random_Flag,L_4D_Day_MS
 	ldx		#lcd_D
 	jsr		F_ClrSymbol
@@ -286,6 +288,7 @@ DSMode_Symbol:
 	ldx		#lcd_DM
 	jsr		F_DisSymbol
 
+	jsr		L_4D_Day_Judge						; 判断是否为4D日
 	bbs3	Random_Flag,L_4D_Day_DS
 	ldx		#lcd_D
 	jsr		F_ClrSymbol
@@ -300,6 +303,7 @@ L_No_4D_Day_DS:
 ; 判断是否为周三、周六、周天，这三天是4D全天显示日
 L_4D_Day_Judge:
 	jsr		L_GetWeek
+	cmp		#00
 	bne		No_Sunday
 	smb3	Random_Flag
 	rts
@@ -315,6 +319,19 @@ No_Wednesday:
 	rts
 No_Saturday:
 	rmb3	Random_Flag
+	rts
+
+
+L_4D_Day_Display:
+	jsr		L_4D_Day_Judge						; 判断是否为4D日
+	bbs3	Random_Flag,L_4D_Day
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	bra		L_No_4D_Day
+L_4D_Day:
+	ldx		#lcd_D
+	jsr		F_DisSymbol
+L_No_4D_Day:
 	rts
 
 
@@ -364,5 +381,3 @@ L_DecToHex_End:
 	adc		P_Temp+2							; 加上低位值
 
 	rts
-
-

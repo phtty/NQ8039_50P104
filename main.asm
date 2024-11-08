@@ -64,6 +64,7 @@ L_Clear_Ram_Loop:
 ; 状态机
 MainLoop:
 	jsr		F_Time_Run							; 走时全局生效
+	jsr		L_4D_Day_Display					; 判断是否为4D日
 	jsr		F_Display_Week						; 星期显示只有4D模式不生效
 	jsr		F_Backlight							; 背光全局生效
 	jsr		F_SymbolRegulate
@@ -118,7 +119,7 @@ Status_Month_Set:
 	jsr		F_DisMonth_Set
 	jsr		F_ReturnToRunTime_Juge					; 30S无操作返回RT模式
 	sta		HALT
-	bra		MainLoop
+	jmp		MainLoop
 Status_Day_Set:
 	jsr		F_KeyTrigger_Long						; 日期设置模式下有长按
 	jsr		F_DisDay_Set
@@ -245,7 +246,6 @@ L_EndIrq:
 .include	Disp.asm
 .include	Display.asm
 .include	Lcdtab.asm
-;.include	TestMode.asm
 .include	Random.asm
 
 
