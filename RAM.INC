@@ -75,6 +75,7 @@ Random_Flag				DS		1
 ;bit0 = 1 滚动显示开始
 ;bit1 = 1 帧更新
 ;bit2 = 1 停止随机数采样
+;bit3 = 1 4D日
 
 Frame_Serial			DS		1
 

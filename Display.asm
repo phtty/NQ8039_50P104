@@ -212,8 +212,14 @@ F_SymbolRegulate:
 	rts
 
 RTMode_Symbol:
+	bbs3	Random_Flag,L_4D_Day_RT
 	ldx		#lcd_D
 	jsr		F_ClrSymbol
+	bra		L_No_4D_Day_RT
+L_4D_Day_RT:
+	ldx		#lcd_D
+	jsr		F_DisSymbol
+L_No_4D_Day_RT:
 	ldx		#lcd_DM
 	jsr		F_ClrSymbol
 	rts
@@ -234,8 +240,6 @@ RTMode_Symbol:
 TMMode_Symbol:
 	ldx		#lcd_COL
 	jsr		F_ClrSymbol
-	ldx		#lcd_D
-	jsr		F_ClrSymbol
 	ldx		#lcd_PM
 	jsr		F_ClrSymbol
 	rts
@@ -251,23 +255,69 @@ YSMode_Symbol:
 	jsr		F_ClrSymbol
 	ldx		#lcd_PM
 	jsr		F_ClrSymbol
+
+	bbs3	Random_Flag,L_4D_Day_YS
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	bra		L_No_4D_Day_YS
+L_4D_Day_YS:
+	ldx		#lcd_D
+	jsr		F_DisSymbol
+L_No_4D_Day_YS:
 	rts
 
 MSMode_Symbol:
 	ldx		#lcd_DM
 	jsr		F_DisSymbol
-	ldx		#lcd_D
-	jsr		F_ClrSymbol
 	ldx		#lcd_Y
 	jsr		F_ClrSymbol
+
+	bbs3	Random_Flag,L_4D_Day_MS
+	ldx		#lcd_D
+	jsr		F_ClrSymbol
+	bra		L_No_4D_Day_MS
+L_4D_Day_MS:
+	ldx		#lcd_D
+	jsr		F_DisSymbol
+L_No_4D_Day_MS:
 	rts
 
 DSMode_Symbol:
 	ldx		#lcd_DM
 	jsr		F_DisSymbol
+
+	bbs3	Random_Flag,L_4D_Day_DS
 	ldx		#lcd_D
 	jsr		F_ClrSymbol
+	bra		L_No_4D_Day_DS
+L_4D_Day_DS:
+	ldx		#lcd_D
+	jsr		F_DisSymbol
+L_No_4D_Day_DS:
 	rts
+
+
+; 判断是否为周三、周六、周天，这三天是4D全天显示日
+L_4D_Day_Judge:
+	jsr		L_GetWeek
+	bne		No_Sunday
+	smb3	Random_Flag
+	rts
+No_Sunday:
+	cmp		#03
+	bne		No_Wednesday
+	smb3	Random_Flag
+	rts
+No_Wednesday:
+	cmp		#06
+	bne		No_Saturday
+	smb3	Random_Flag
+	rts
+No_Saturday:
+	rmb3	Random_Flag
+	rts
+
+
 
 
 L_LSR_4Bit:

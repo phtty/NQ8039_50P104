@@ -221,7 +221,7 @@ L_KeyDTrigger_Long:
 
 L_KeyUTrigger_Long:
 	lda		#0
-	sta		Return_Counter						; 重置走时模式计时
+	sta		Return_Counter						; 重置返回走时模式计时
 	rmb0	Key_Flag
 
 	lda		Sys_Status_Flag
@@ -250,7 +250,7 @@ No_StatusDS_KeyU:
 L_KeySTrigger_Long:
 	jsr		F_SymbolRegulate					; 显示对应模式的常亮符号
 	lda		#0
-	sta		Return_Counter						; 重置4D模式计时
+	sta		Return_Counter						; 重置返回走时模式计时
 	rmb0	Key_Flag
 
 	lda		Sys_Status_Flag
@@ -346,6 +346,11 @@ L_KeyDTrigger_4DMode:
 L_KeyUTrigger_4DMode:
 	lda		#0
 	sta		Return_Counter
+	sta		Frame_Counter
+	sta		Frame_Serial
+	sta		Anim_Phase
+	rmb0	Random_Flag							; 滚动显示停止
+	rmb2	Random_Flag							; 重新开始采样随机数
 	rmb4	Key_Flag
 	jsr		L_Return_Stop						; 4D模式下U键可以回到时间模式
 	rts
