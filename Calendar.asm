@@ -126,6 +126,7 @@ L_Blink_Month:
 	bbs1	Timer_Flag,L_Month_Clear			; 有1S标志时灭
 L_KeyTrigger_NoBlink_Month:
 	jsr		L_DisDate_Month
+	jsr		L_DisDate_Day
 	rts	
 L_Month_Clear:
 	rmb1	Timer_Flag							; 清1S标志
@@ -143,6 +144,7 @@ L_Blink_Day:
 	bbs1	Timer_Flag,L_Day_Clear				; 有1S标志时灭
 L_KeyTrigger_NoBlink_Day:
 	jsr		L_DisDate_Day
+	jsr		L_DisDate_Month
 	rts	
 L_Day_Clear:
 	rmb1	Timer_Flag							; 清1S标志

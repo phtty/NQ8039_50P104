@@ -66,6 +66,7 @@ L_KeyLTrigger_Short:							; 背光功能全状态都一样
 	rts
 
 L_KeyDTrigger_Short:
+	smb4	Key_Flag							; 非走时模式
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
 

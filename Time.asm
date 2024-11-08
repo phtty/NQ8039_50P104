@@ -124,6 +124,7 @@ L_No_Date_Add_HS:
 	bbs1	Timer_Flag,L_Hour_Clear
 L_KeyTrigger_NoBlink_Hour:
 	jsr		L_DisTime_Hour						; 半S亮
+	jsr		L_DisTime_Min
 	ldx		#lcd_COL
 	jsr		F_DisSymbol
 	rts
@@ -148,6 +149,7 @@ L_No_Date_Add_MS:
 	bbs1	Timer_Flag,L_Min_Clear
 L_KeyTrigger_NoBlink_Min:
 	jsr		L_DisTime_Min						; 半S亮
+	jsr		L_DisTime_Hour
 	ldx		#lcd_COL
 	jsr		F_DisSymbol
 	rts

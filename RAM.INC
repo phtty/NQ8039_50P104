@@ -28,7 +28,6 @@ Counter_Lcd				DS		1
 
 QuickAdd_Counter		DS		1
 Backlight_Counter		DS		1
-AlarmLoud_Counter		DS		1
 Return_Counter			DS		1
 
 Calendar_Flag			DS		1
@@ -37,12 +36,6 @@ Calendar_Flag			DS		1
 
 Clock_Flag				DS		1
 ;bit0 = 1 12h模式
-;bit1 = 1 闹钟开启模式
-;bit2 = 1 响闹模式
-;bit3 = 1 贪睡模式
-;bit4 = 1 持续响铃模式; 0 序列响铃模式
-;bit5	  上次的响闹模式，判断是响闹结束还是未响闹
-;bit6 = 1 贪睡按键触发导致的响闹结束
 
 Timer_Flag				DS		1
 ;bit0 = 1 Timer2 半S计时

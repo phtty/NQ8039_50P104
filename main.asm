@@ -57,9 +57,7 @@ L_Clear_Ram_Loop:
 
 	cli												; 开总中断
 
-	jsr		F_Display_Time
-	jsr		F_DisDate_Week
-
+	jsr		F_Test_Mode
 
 ; 状态机
 MainLoop:
@@ -246,6 +244,7 @@ L_EndIrq:
 .include	Disp.asm
 .include	Display.asm
 .include	Lcdtab.asm
+.include	TestMode.asm
 .include	Random.asm
 
 

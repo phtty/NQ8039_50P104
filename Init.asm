@@ -14,7 +14,6 @@ F_Init_SystemRam:							; 系统初始化
 	sta		Timer_Flag
 	sta		Clock_Flag
 	sta		Calendar_Flag
-	sta		AlarmLoud_Counter					; 阶段响闹计数
 	sta		QuickAdd_Counter					; 快加标志的计数
 	sta		Backlight_Counter
 	sta		Return_Counter
@@ -22,16 +21,16 @@ F_Init_SystemRam:							; 系统初始化
 	lda		#01
 	sta		Sys_Status_Flag
 
-	lda		#05
+	lda		#00
 	sta		R_Time_Hour
-	lda		#27
+	lda		#00
 	sta		R_Time_Min
 	lda		#00
 	sta		R_Time_Sec
 
-	lda		#05
+	lda		#01
 	sta		R_Date_Day
-	lda		#07
+	lda		#01
 	sta		R_Date_Month
 	lda		#24
 	sta		R_Date_Year

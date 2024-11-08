@@ -192,12 +192,6 @@ No_4DMode_Week:
 	rts
 
 
-F_UnDisplay_InDateMode:
-	ldx		#lcd_PM
-	jsr		F_ClrSymbol
-	ldx		#lcd_COL
-	jsr		F_ClrSymbol
-	rts
 
 
 F_SymbolRegulate:
@@ -212,14 +206,8 @@ F_SymbolRegulate:
 	rts
 
 RTMode_Symbol:
-	bbs3	Random_Flag,L_4D_Day_RT
-	ldx		#lcd_D
+	ldx		#lcd_Y
 	jsr		F_ClrSymbol
-	bra		L_No_4D_Day_RT
-L_4D_Day_RT:
-	ldx		#lcd_D
-	jsr		F_DisSymbol
-L_No_4D_Day_RT:
 	ldx		#lcd_DM
 	jsr		F_ClrSymbol
 	rts
@@ -255,16 +243,6 @@ YSMode_Symbol:
 	jsr		F_ClrSymbol
 	ldx		#lcd_PM
 	jsr		F_ClrSymbol
-
-	jsr		L_4D_Day_Judge						; 判断是否为4D日
-	bbs3	Random_Flag,L_4D_Day_YS
-	ldx		#lcd_D
-	jsr		F_ClrSymbol
-	bra		L_No_4D_Day_YS
-L_4D_Day_YS:
-	ldx		#lcd_D
-	jsr		F_DisSymbol
-L_No_4D_Day_YS:
 	rts
 
 MSMode_Symbol:
@@ -272,31 +250,12 @@ MSMode_Symbol:
 	jsr		F_DisSymbol
 	ldx		#lcd_Y
 	jsr		F_ClrSymbol
-
-	jsr		L_4D_Day_Judge						; 判断是否为4D日
-	bbs3	Random_Flag,L_4D_Day_MS
-	ldx		#lcd_D
-	jsr		F_ClrSymbol
-	bra		L_No_4D_Day_MS
-L_4D_Day_MS:
-	ldx		#lcd_D
-	jsr		F_DisSymbol
 L_No_4D_Day_MS:
 	rts
 
 DSMode_Symbol:
 	ldx		#lcd_DM
 	jsr		F_DisSymbol
-
-	jsr		L_4D_Day_Judge						; 判断是否为4D日
-	bbs3	Random_Flag,L_4D_Day_DS
-	ldx		#lcd_D
-	jsr		F_ClrSymbol
-	bra		L_No_4D_Day_DS
-L_4D_Day_DS:
-	ldx		#lcd_D
-	jsr		F_DisSymbol
-L_No_4D_Day_DS:
 	rts
 
 
@@ -323,6 +282,7 @@ No_Saturday:
 
 
 L_4D_Day_Display:
+	bbs1	Sys_Status_Flag,L_No_4D_Day			; 如果在4D模式则由4D模式接管亮灭
 	jsr		L_4D_Day_Judge						; 判断是否为4D日
 	bbs3	Random_Flag,L_4D_Day
 	ldx		#lcd_D
