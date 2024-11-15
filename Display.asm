@@ -11,6 +11,7 @@ L_DisTime_Min:
 	ldx		#lcd_d3
 	jsr		L_Dis_15Bit_DigitDot
 	pla
+	and		#$f0
 	jsr		L_LSR_4Bit
 	ldx		#lcd_d2
 	jsr		L_Dis_15Bit_DigitDot
@@ -93,6 +94,7 @@ L_DisDate_Day:
 	ldx		#lcd_d1
 	jsr		L_Dis_15Bit_DigitDot
 	pla
+	and		#$f0
 	jsr		L_LSR_4Bit
 	bne		L_Day_Tens_NoZero					; 日期十位0不显示
 	lda		#$0b
@@ -109,6 +111,7 @@ L_DisDate_Month:
 	ldx		#lcd_d3
 	jsr		L_Dis_15Bit_DigitDot
 	pla
+	and		#$f0
 	jsr		L_LSR_4Bit
 	bne		L_Month_Tens_NoZero					; 月份十位0不显示
 	lda		#$0b
@@ -259,7 +262,7 @@ DSMode_Symbol:
 	rts
 
 
-; 判断是否为周三、周六、周天，这三天是4D全天显示日
+; 判断是否为周三、周六、周天，这三天4D全天显示
 L_4D_Day_Judge:
 	jsr		L_GetWeek
 	cmp		#00
@@ -282,7 +285,7 @@ No_Saturday:
 
 
 L_4D_Day_Display:
-	bbs1	Sys_Status_Flag,L_No_4D_Day			; 如果在4D模式则由4D模式接管亮灭
+	bbs1	Sys_Status_Flag,L_No_4D_Day			; 如果在4D模式则由4D模式接管4D亮灭
 	jsr		L_4D_Day_Judge						; 判断是否为4D日
 	bbs3	Random_Flag,L_4D_Day
 	ldx		#lcd_D
@@ -303,7 +306,6 @@ L_LSR_4Bit:
 	ror
 	ror
 	ror
-	and		#$0f
 	rts
 
 

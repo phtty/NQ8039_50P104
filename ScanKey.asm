@@ -13,9 +13,7 @@ L_DelayTrigger_Short:							; 消抖延时循环用标签
 	lda		P_Temp
 	bne		L_DelayTrigger_Short				; 软件消抖
 
-	rmb4	IER									; 恢复PA口中断
-	smb5	PA									; 判断4D和LED键
-	rmb0	PC
+	jsr		F_KeyMatrix_PA5Scan_Ready			; 判断4D和LED键
 	lda		PA									; 正常走时模式下只对2个按键有响应
 	and		#$8c
 	cmp		#$80
@@ -30,12 +28,7 @@ No_KeyKTrigger_Short:
 	bne		No_KeyDTrigger_Short
 	jmp		L_KeyDTrigger_Short					; 4D键触发
 No_KeyDTrigger_Short:
-	rmb5	PA									; 判断SET键和UP键
-	smb0	PC
-	rmb4	IFR									; 开启中断前需要重新复位标志位
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
-	smb4	IER									; 恢复PA口中断
+	jsr		F_KeyMatrix_PC0Scan_Ready			; 判断SET键和UP键
 	lda		PA
 	and		#$8c
 	cmp		#$80
@@ -47,6 +40,7 @@ No_KeyUTrigger_Short:
 	jmp		L_KeySTrigger_Short					; Set键触发
 
 L_KeyExit_Short:
+	jsr		F_KeyMatrix_Reset					; 重新打开PA中断，矩阵状态重置
 	bbs2	Random_Flag,L_NoRandom_Get			; 在滚动随机数时，停止随机数变更
 	jsr		F_RandomSeed1_Get
 	jsr		F_RandomSeed3_Get
@@ -55,17 +49,15 @@ L_NoRandom_Get:
 
 ; 根据状态进入不同的模式的按键处理
 L_KeyLTrigger_Short:							; 背光功能全状态都一样
+	jsr		F_KeyMatrix_Reset					; 重新打开PA中断，矩阵状态重置
 	smb3	Key_Flag
 	smb2	PB
 	lda		#0
 	sta		Backlight_Counter					; 每次按背光都会重置计时
-	rmb4	IFR									; 开启中断前需要重新复位标志位
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
-	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyDTrigger_Short:
+	jsr		F_KeyMatrix_Reset					; 重新打开PA中断，矩阵状态重置
 	smb4	Key_Flag							; 非走时模式
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
@@ -79,21 +71,19 @@ No_Status4D_KeyD:
 	rts
 
 L_KeyKTrigger_Short:
+	jsr		F_KeyMatrix_Reset					; 重新打开PA中断，矩阵状态重置
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
 
 	lda		Sys_Status_Flag
 	cmp		#00000010B
 	bne		No_Status4D_KeyK
-	jmp		L_KeyKTrigger_4DMode				; 4D模式的4D键会触发随机数滚动
+	jmp		L_KeyKTrigger_4DMode				; 4D模式的K键会触发随机数滚动
 No_Status4D_KeyK:
-	rmb4	IFR									; 开启中断前需要重新复位标志位
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
-	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyUTrigger_Short:
+	jsr		F_KeyMatrix_Reset					; 重新打开PA中断，矩阵状态重置
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
 
@@ -113,6 +103,7 @@ No_StatusTM_KeyU:
 	rts
 
 L_KeySTrigger_Short:
+	jsr		F_KeyMatrix_Reset					; 重新打开PA中断，矩阵状态重置
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
 
@@ -160,6 +151,7 @@ L_KeyScan_Long:									; 长按处理部分
 L_Key8Hz_Long:
 	bbr4	Timer_Flag,L_Key8HzExit_Long		; 8Hz标志位到来前也不进行按键处理(快加下)
 	rmb4	Timer_Flag
+	jsr		F_QuikAdd_Scan						; 矩阵扫描，需要开启IO口
 	lda		PA
 	and		#$84
 	cmp		PA_IO_Backup						; 若检测到有按键的状态变化则退出快加判断并结束
@@ -176,9 +168,7 @@ L_QuikAdd_Long:
 	smb3	Timer_Flag
 
 L_KeyHandle_Long:
-	rmb4	IER									; 关闭PA口中断，以免重复进中断服务函数
-	smb5	PA
-	rmb0	PC
+	jsr		F_KeyMatrix_PA5Scan_Ready
 	lda		PA									; 判断4D键和LED键
 	and		#$84
 	bbs3	Timer_Flag,No_KeyDTrigger_Long		; L、D键不需要快加
@@ -190,12 +180,7 @@ No_KeyLTrigger_Long:
 	bne		No_KeyDTrigger_Long
 	jmp		L_KeyDTrigger_Long					; 4D键触发
 No_KeyDTrigger_Long:
-	rmb5	PA
-	smb0	PC									; 虽然没有中断使能，但是上升沿依旧会置标志位
-	rmb4	IFR									; 开启中断前需要重新复位标志位
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
-	smb4	IER									; 恢复PA口中断
+	jsr		F_KeyMatrix_PC0Scan_Ready
 	lda		PA									; 判断SET键和UP键
 	and		#$84
 	cmp		#$80
@@ -216,23 +201,22 @@ L_KeyExit_Long:
 	bbs2	Random_Flag,L_Key8HzExit_Long		; 在滚动随机数时，停止随机数变更
 	jsr		F_RandomSeed1_Get
 	jsr		F_RandomSeed3_Get
+	jsr		F_KeyMatrix_Reset
 L_Key8HzExit_Long:
 	rts
 
 ; 根据状态进入不同的模式的按键处理
 L_KeyLTrigger_Long:								; 背光键全状态功能都一样
+	jsr		F_KeyMatrix_Reset
+	rmb0	Key_Flag
 	smb3	Key_Flag
 	smb2	PB
 	lda		#0
 	sta		Backlight_Counter					; 每次按背光都会重置计时
-	rmb4	IFR									; 开启中断前需要重新复位标志位
-	rmb0	Key_Flag
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
-	smb4	IER									; 恢复PA口中断
 	rts
 
 L_KeyDTrigger_Long:
+	jsr		F_KeyMatrix_Reset
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
 	rmb0	Key_Flag
@@ -240,9 +224,9 @@ L_KeyDTrigger_Long:
 	rts
 
 L_KeyUTrigger_Long:
+	jsr		F_KeyMatrix_Reset
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
-	rmb0	Key_Flag
 
 	lda		Sys_Status_Flag
 	cmp		#00001000B
@@ -268,6 +252,7 @@ No_StatusDS_KeyU:
 	rts
 
 L_KeySTrigger_Long:
+	jsr		F_KeyMatrix_Reset
 	jsr		F_SymbolRegulate					; 显示对应模式的常亮符号
 	lda		#0
 	sta		Return_Counter						; 重置返回走时模式计时
@@ -320,10 +305,6 @@ L_KeyDTrigger_No4DMode:
 
 	lda		Random_Flag
 
-	rmb4	IFR									; 开启中断前需要重新复位标志位
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
-	smb4	IER									; 恢复PA口中断
 	pla
 	pla
 	jmp		MainLoop
@@ -357,10 +338,6 @@ L_KeyDTrigger_4DMode:
 	jsr		F_RandomSeed0_Get
 	jsr		F_RandomSeed2_Get
 
-	rmb4	IFR									; 开启中断前需要重新复位标志位
-	smb5	PA									; 恢复高电平以方便下一次按键
-	smb0	PC
-	smb4	IER									; 恢复PA口中断
 	rts
 
 ; 4D模式的U键处理

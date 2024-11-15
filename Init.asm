@@ -42,7 +42,7 @@ F_Init_SystemRam:							; 系统初始化
 
 F_LCD_Init:
 	; 设置为强模式，1/3Bias 3.0V
-	lda		#C_BIS_C_1_3_V45+C_HIS_Strong
+	lda		#C_BIS_C_1_3_V30+C_HIS_Strong
 	sta		LCD_CTRL
 
 	; 设置为4COM 28SEG模式，打开Charge Pump， LCD中断频率为1/2FrameRate
@@ -74,22 +74,15 @@ F_Port_Init:
 	
 	smb4	IER									; 打开PA口外部中断
 
-	lda		PC_DIR								; PC0、1配置为输出，初始值为高
+	lda		PC_DIR								; PC0、1配置为输出
 	and		#$fc
 	sta		PC_DIR
-	lda		PC
-	and		#$fd
-	sta		PC
+	smb0	PC									; PC0配置输出高
+	rmb1	PC									; PC1配置输出低
 
-	lda		PB
-	and		#$fb
-	sta		PB
-
-	lda		#04
-	sta		PB_TYPE
-
-	; PB2口作背光输出,PB3作PN声音输出
-	lda		#C_PB3S
+	rmb2	PB
+	smb2	PB_TYPE								; PB2口作背光输出
+	lda		#C_PB3S								; PB3作PN声音输出
 	sta		PADF0
 
 	rts
@@ -122,16 +115,59 @@ F_Timer_Init:
 	rts
 
 
-F_Beep_Init:
-	; 配置蜂鸣器的PWM输出口为PB3 PN输出
-	lda		#C_PB3S
-	sta		PADF0
 
-	; 配置PWM频率为Fsub的16分频 1/2占空比
-	lda		DIVC
-	ora		#C_TONE_Fsub_16_1_2
-	sta		DIVC
 
-	rmb1	AUDCR								; 配置BP位，选择AUD开启时的模式，这里选择TONE模式				
-	lda		#$ff
-	sta		AUD0								; TONE模式下其实AUD0没用
+F_KeyMatrix_PA5Scan_Ready:
+	rmb4	IER									; 关闭PA口中断，避免误触发中断
+	lda		#$ac
+	sta		PA
+
+	lda		PC
+	and		#$fe
+	sta		PC
+	rmb4	IFR									; 复位标志位,避免中断开启时直接进入中断服务
+	jsr		F_Delay
+	rts
+
+F_KeyMatrix_PC0Scan_Ready:
+	rmb4	IER									; 关闭PA口中断，避免误触发中断
+	lda		#$8c
+	sta		PA
+
+	lda		PC
+	ora		#$01
+	sta		PC
+	rmb4	IFR									; 复位标志位,避免中断开启时直接进入中断服务
+	jsr		F_Delay
+	rts
+
+F_KeyMatrix_Reset:
+	bbs3	Timer_Flag,L_QuikAdd_ScanReset
+F_QuikAdd_Scan:
+	lda		#$ac
+	sta		PA
+
+	lda		PC
+	ora		#$01
+	sta		PC
+	rmb4	IFR									; 复位标志位,避免中断开启时直接进入中断服务
+	smb4	IER									; 开启PA口中断
+	rts
+L_QuikAdd_ScanReset:							; 有长按时PA5,PC0输出低，避免长按时漏电
+	lda		#$8c
+	sta		PA
+
+	lda		PC
+	and		#$fe
+	sta		PC
+	rts
+
+
+F_Delay:
+	lda		#$f5
+	sta		P_Temp
+L_Delay_f5:										; 延时循环用标签
+	inc		P_Temp
+	lda		P_Temp
+	bne		L_Delay_f5
+	rts

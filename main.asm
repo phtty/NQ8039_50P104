@@ -39,7 +39,6 @@ L_Clear_Ram_Loop:
 	lda		FUSE
 	sta		MF0										; 为内部RC振荡器提供校准数据	
 
-	jsr		F_Beep_Init
 	jsr		F_Init_SystemRam						; 初始化系统RAM并禁用所有断电保留的RAM
 
 	jsr		F_LCD_Init
@@ -251,8 +250,8 @@ L_EndIrq:
 .BLKB	0FFFFH-$,0FFH							; 从当前地址到FFFF全部填充0xFF
 
 .ORG	0FFF8H
-	DB		C_RST_SEL + C_OMS0 + C_PAIM
-	DB		C_PB32IS + C_PROTB
+	DB		C_RST_SEL+C_VOLT_V30+C_OMS0+C_PAIM
+	DB		C_PB32IS+C_PROTB
 	DW		0FFFFH
 
 .ORG	0FFFCH
